@@ -1,0 +1,35 @@
+# ========== IntelliJ IDEA 相关 ==========
+.idea/
+*.iml
+out/
+.idea_modules/
+
+# ========== Gradle 相关 ==========
+.gradle/
+build/
+gradlew
+gradlew.bat
+gradle.properties
+
+# ========== Kotlin 相关 ==========
+*.kotlin_module
+
+# ========== Android 相关 ==========
+local.properties
+*.apk
+*.ap_
+app/build/
+.cxx/
+.externalNativeBuild/
+
+# ========== 系统与临时文件 ==========
+.DS_Store
+*.swp
+*.swo
+
+# ========== 子模块构建目录（针对 Homework01 模块） ==========
+TrainingCamp/Homework01/.gradle/
+TrainingCamp/Homework01/build/
+TrainingCamp/Homework01/.idea/
+TrainingCamp/Homework01/.kotlin/
+TrainingCamp/Homework01/app/build/
