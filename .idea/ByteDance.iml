@@ -4,6 +4,8 @@
     <exclude-output />
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/TrainingCamp/Homework01/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/TrainingCamp/Homework01/.idea" />
+      <excludeFolder url="file://$MODULE_DIR$/TrainingCamp/Homework01/.kotlin" />
       <excludeFolder url="file://$MODULE_DIR$/TrainingCamp/Homework01/app/build" />
     </content>
     <orderEntry type="inheritedJdk" />
