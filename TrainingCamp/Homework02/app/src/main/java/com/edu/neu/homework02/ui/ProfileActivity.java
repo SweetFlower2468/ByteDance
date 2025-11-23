@@ -51,12 +51,12 @@ public class ProfileActivity extends AppCompatActivity {
 
         // 1. 准备数据：
         List<MenuItem> menuItems = new ArrayList<>();
-        menuItems.add(new MenuItem("个人信息", android.R.drawable.ic_menu_myplaces));
+        menuItems.add(new MenuItem("个人信息", R.drawable.file));
         menuItems.add(new MenuItem("我的收藏", R.drawable.favourite_file));
-        menuItems.add(new MenuItem("浏览历史", android.R.drawable.ic_menu_recent_history));
-        menuItems.add(new MenuItem("设置", android.R.drawable.ic_menu_preferences));
-        menuItems.add(new MenuItem("关于我们", android.R.drawable.ic_menu_info_details));
-        menuItems.add(new MenuItem("意见反馈", android.R.drawable.ic_menu_help));
+        menuItems.add(new MenuItem("浏览历史", R.drawable.time));
+        menuItems.add(new MenuItem("设置", R.drawable.setting));
+        menuItems.add(new MenuItem("关于我们", R.drawable.information));
+        menuItems.add(new MenuItem("意见反馈", R.drawable.edit_file));
         // 添加退出登录项
         menuItems.add(new MenuItem("退出登录", android.R.drawable.ic_lock_power_off));
 
