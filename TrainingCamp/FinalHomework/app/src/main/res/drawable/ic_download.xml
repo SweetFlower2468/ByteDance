@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+
+    <!--
+      调整说明:
+      1. 箭头主体 (M12,3 L12,15): 终点从16上移到15，远离底部。
+      2. 箭头头部 (M7,10...): 稍微收窄一点点，配合高度变化。
+      3. 托盘 (M4,14...): X轴从5/19 调整为 4/20，加宽了2dp，看起来更开阔。
+    -->
+    <path
+        android:strokeWidth="2.5"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="
+            M12,3 L12,15
+            M7,10 L12,15 L17,10
+            M4,14 L4,19 L20,19 L20,14" />
+
+</vector>

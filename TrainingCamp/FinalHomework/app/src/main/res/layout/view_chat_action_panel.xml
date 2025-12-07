@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/surface_card"
+    android:orientation="horizontal"
+    android:paddingVertical="16dp"
+    android:paddingHorizontal="8dp"
+    android:gravity="center_vertical">
+
+    <!-- 1. 相机 -->
+    <include
+        android:id="@+id/action_camera"
+        layout="@layout/item_action_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <!-- 2. 相册 -->
+    <include
+        android:id="@+id/action_gallery"
+        layout="@layout/item_action_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <!-- 3. 文件 -->
+    <include
+        android:id="@+id/action_file"
+        layout="@layout/item_action_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+    <!-- 4. 深度思考 -->
+    <include
+        android:id="@+id/action_deep_think"
+        layout="@layout/item_action_button"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" />
+
+</LinearLayout>

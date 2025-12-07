@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:paddingEnd="12dp">
+
+    <!-- ==========================
+         情况 A: 文件显示区域
+         ========================== -->
+    <FrameLayout
+        android:id="@+id/container_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="visible"> <!-- 预览时让文件可见 -->
+
+        <!-- 复用文件组件，强制限制宽度，防止太长 -->
+        <include
+            android:id="@+id/include_file"
+            layout="@layout/item_msg_attachment_file"
+            android:layout_width="220dp"
+            android:layout_height="wrap_content" />
+
+        <!-- 删除按钮 -->
+        <ImageView
+            android:id="@+id/btn_remove_file"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/bg_white_circle"
+            android:elevation="4dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_secondary" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/container_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        tools:visibility="gone"> <!-- 预览时隐藏图片，避免重叠看不清 -->
+
+        <include
+            android:id="@+id/include_image"
+            layout="@layout/item_msg_attachment_image"
+            android:layout_width="wrap_content"
+            android:layout_height="72dp" />
+
+        <ImageView
+            android:id="@+id/btn_remove_image"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/bg_white_circle"
+            android:elevation="4dp"
+            android:padding="4dp"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_secondary" />
+    </FrameLayout>
+
+</FrameLayout>

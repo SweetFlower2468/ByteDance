@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="@dimen/spacing_xs"
+    android:paddingBottom="@dimen/spacing_xs">
+
+    <!--
+       消息容器 (垂直线性布局)
+       1. layout_constraintHorizontal_bias="1.0": 整体靠右
+       2. layout_constraintStart_toStartOf="parent" + marginStart="48dp": 限制最大宽度，左侧留白
+       3. gravity="end": 内部元素靠右对齐
+    -->
+    <LinearLayout
+        android:id="@+id/msg_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/spacing_m"
+        android:layout_marginStart="24dp"
+        android:gravity="end"
+        android:orientation="vertical"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!--
+           1. 附件展示区 (文件/图片合成器)
+           用户要求：在最上方
+           复用 view_quote_file_preview (内含横向 RecyclerView)
+           注意：在 Adapter 中需隐藏内部的 btn_close
+        -->
+        <include
+            android:id="@+id/include_quote_file"
+            layout="@layout/view_quote_file_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!--
+           2. 文本引用区
+           用户要求：在文件下方
+           复用 view_quote_text_preview
+           注意：在 Adapter 中需隐藏内部的 btn_close
+        -->
+        <include
+            android:id="@+id/include_quote_text"
+            layout="@layout/view_quote_text_preview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:visibility="gone"
+            tools:visibility="visible" />
+
+        <!--
+           3. 核心文本气泡
+           背景为深蓝色圆角
+        -->
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_bubble_user"
+            android:lineSpacingExtra="3dp"
+            android:paddingHorizontal="@dimen/spacing_m"
+            android:paddingVertical="@dimen/spacing_s"
+            android:textColor="@color/text_on_brand"
+            android:textSize="@dimen/text_body"
+            android:textIsSelectable="true"
+            tools:text="帮我写一个 Java 的冒泡排序，并解释一下时间复杂度。附件是我的代码规范文档。" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

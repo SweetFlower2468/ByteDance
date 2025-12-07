@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/chat_header"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:background="@color/surface_card"
+    android:elevation="2dp"
+    android:paddingHorizontal="8dp">
+
+    <!-- 1. 左上角：模型管理入口 (三横) -->
+    <ImageButton
+        android:id="@+id/btn_nav_model"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="Model Management"
+        android:src="@drawable/ic_menu_burger"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@color/text_primary" />
+
+    <!-- 2. 中间左侧：模型选择下拉框 (Custom Spinner) -->
+    <LinearLayout
+        android:id="@+id/layout_model_spinner"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/bg_select_model"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingHorizontal="12dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/btn_nav_model"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tv_current_model"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:maxWidth="140dp"
+            android:singleLine="true"
+            android:text="Llama 3.2 (3B)"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_triangle_left"
+            app:tint="@color/text_secondary" />
+    </LinearLayout>
+
+    <!-- 3. 右侧按钮组 (线性布局包裹) -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- 3.1 深度思考开关 (Toggle) -->
+        <ImageButton
+            android:id="@+id/btn_toggle_deep_think"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Deep Think Toggle"
+            android:scaleType="centerInside"
+            android:src="@drawable/selector_brain_toggle"
+            tools:tint="@color/text_secondary"/> <!-- selector会自动处理颜色 -->
+
+        <!-- 3.2 历史记录 -->
+        <ImageButton
+            android:id="@+id/btn_history"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="History"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_history"
+            app:tint="@color/text_primary" />
+
+        <!-- 3.3 个人/设置 -->
+        <ImageButton
+            android:id="@+id/btn_profile"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Profile"
+            android:scaleType="centerInside"
+            android:src="@drawable/ic_settings"
+            app:tint="@color/text_primary" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
