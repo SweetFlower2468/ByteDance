@@ -3,26 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/surface_background"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/surface_background">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_card"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        android:background="@color/surface_background"
         app:title="反馈历史"
-        app:titleCentered="true" />
+        app:titleCentered="true"
+        app:navigationIcon="@drawable/ic_triangle_left" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_feedback"
+        android:id="@+id/recycler_history"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingTop="16dp"
-        android:paddingBottom="16dp"
-        android:overScrollMode="never"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
-
+        android:paddingTop="8dp"
+        android:clipToPadding="false"/>
 </LinearLayout>

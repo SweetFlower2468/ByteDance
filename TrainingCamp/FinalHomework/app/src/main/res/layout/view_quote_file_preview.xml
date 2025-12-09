@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bg_quote_pill"
-    android:paddingStart="12dp"
+    android:paddingStart="8dp"
     android:paddingTop="6dp"
     android:paddingEnd="8dp"
     android:paddingBottom="6dp">
@@ -28,13 +28,15 @@
     -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_attachments"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
         android:layout_marginEnd="8dp"
         android:orientation="horizontal"
         android:overScrollMode="never"
         android:scrollbars="none"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constrainedWidth="true"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/btn_close"

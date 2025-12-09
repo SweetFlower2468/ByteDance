@@ -71,7 +71,6 @@
             android:paddingVertical="@dimen/spacing_s"
             android:textColor="@color/text_on_brand"
             android:textSize="@dimen/text_body"
-            android:textIsSelectable="true"
             tools:text="帮我写一个 Java 的冒泡排序，并解释一下时间复杂度。附件是我的代码规范文档。" />
 
     </LinearLayout>

@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">FinalHomework</string>
+    <string name="splash_loading">正在加载...</string>
+</resources>

@@ -30,21 +30,45 @@
             android:orientation="vertical">
 
             <!-- 选项1：跟随系统 -->
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:text="跟随系统"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp" />
-
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginHorizontal="16dp"/>
-
-            <!-- 选项2：浅色模式 (选中) -->
             <LinearLayout
+                android:id="@+id/layout_system"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="跟随系统"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/iv_check_system"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_check"
+                    android:visibility="gone"
+                    app:tint="@color/brand_primary" />
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@color/divider" />
+
+            <!-- 选项2：浅色模式 -->
+            <LinearLayout
+                android:id="@+id/layout_light"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
                 android:gravity="center_vertical"
                 android:paddingHorizontal="16dp">
 
@@ -57,23 +81,46 @@
                     android:textSize="16sp" />
 
                 <ImageView
+                    android:id="@+id/iv_check_light"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_check"
-                    app:tint="@color/brand_primary"/>
+                    android:visibility="gone"
+                    app:tint="@color/brand_primary" />
             </LinearLayout>
 
-            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/divider" android:layout_marginHorizontal="16dp"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@color/divider" />
 
             <!-- 选项3：暗色模式 -->
-            <TextView
+            <LinearLayout
+                android:id="@+id/layout_dark"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
+                android:background="?attr/selectableItemBackground"
+                android:clickable="true"
                 android:gravity="center_vertical"
-                android:paddingHorizontal="16dp"
-                android:text="暗色模式"
-                android:textColor="@color/text_primary"
-                android:textSize="16sp" />
+                android:paddingHorizontal="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="暗色模式"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp" />
+
+                <ImageView
+                    android:id="@+id/iv_check_dark"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@drawable/ic_check"
+                    android:visibility="gone"
+                    app:tint="@color/brand_primary" />
+            </LinearLayout>
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

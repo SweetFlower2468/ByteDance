@@ -15,24 +15,47 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="@dimen/spacing_m">
+        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/tv_question"
-            android:layout_width="0dp"
+        <!-- Question Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp"
-            tools:text="如何下载本地模型？" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="@dimen/spacing_m">
 
-        <ImageView
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@drawable/ic_triangle_right"
-            app:tint="@color/text_tertiary" />
+            <TextView
+                android:id="@+id/tv_question"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                tools:text="如何下载本地模型？" />
+
+            <ImageView
+                android:id="@+id/iv_arrow"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_triangle_right"
+                app:tint="@color/text_tertiary" />
+
+        </LinearLayout>
+
+        <!-- Answer Body -->
+        <TextView
+            android:id="@+id/tv_answer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="@dimen/spacing_m"
+            android:paddingBottom="@dimen/spacing_m"
+            android:text="Answer goes here..."
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:visibility="gone"
+            tools:visibility="visible" />
 
     </LinearLayout>
 

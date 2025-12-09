@@ -2,24 +2,23 @@
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/card_model"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/spacing_m"
-    android:layout_marginBottom="@dimen/spacing_s"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
     app:cardBackgroundColor="@color/surface_card"
-    app:cardCornerRadius="@dimen/radius_m"
-    app:cardElevation="0dp"
-    app:strokeColor="@color/divider"
-    app:strokeWidth="1dp">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@android:color/transparent"
+    app:strokeWidth="2dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/spacing_m">
+        android:padding="16dp">
 
-        <!-- ================= 顶部信息区 (公共) ================= -->
-
-        <!-- 模型名称 -->
+        <!-- A. Header -->
         <TextView
             android:id="@+id/tv_model_name"
             android:layout_width="wrap_content"
@@ -31,222 +30,244 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 状态标签: [使用中] (仅在激活时显示) -->
+        <!-- Status Badge (Active) -->
         <TextView
-            android:id="@+id/tv_tag_using"
+            android:id="@+id/tv_status_active"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:background="@drawable/bg_model_card_status_active"
-            android:paddingHorizontal="6dp"
+            android:backgroundTint="#E8F5E9"
+            android:paddingHorizontal="8dp"
             android:paddingVertical="2dp"
             android:text="使用中"
-            android:textColor="@color/state_active_text"
-            android:textSize="11sp"
-            android:textStyle="bold"
+            android:textColor="#2E7D32"
+            android:textSize="12sp"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tv_model_name"
             app:layout_constraintStart_toEndOf="@id/tv_model_name"
             app:layout_constraintTop_toTopOf="@id/tv_model_name"
             tools:visibility="visible" />
-
-        <!-- 右侧箭头 (仅在已下载状态显示) -->
+            
+        <!-- Menu / More -->
         <ImageButton
             android:id="@+id/btn_delete"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="-8dp"
-            android:layout_marginEnd="-8dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="删除模型"
-            android:padding="8dp"
             android:src="@drawable/ic_trash_red"
-            android:scaleType="centerInside"
-            android:visibility="gone"
+            app:tint="@color/error"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
             tools:visibility="visible" />
 
-        <!-- 版本说明 (3B-Instruct) -->
+        <!-- B. Description (Version) -->
         <TextView
             android:id="@+id/tv_model_version"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="3B-Instruct"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_model_name" />
 
-        <!-- 参数规格行 (Icon + Text) -->
+        <!-- C. Metadata Row -->
         <LinearLayout
-            android:id="@+id/layout_specs"
-            android:layout_width="0dp"
+            android:id="@+id/layout_metadata"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:gravity="center_vertical"
             android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_model_version">
+            app:layout_constraintTop_toBottomOf="@id/tv_model_version"
+            app:layout_constraintStart_toStartOf="parent">
 
-            <!-- 参数量 -->
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_memory"/> <!-- 蓝色图标 -->
-            <TextView
+            <!-- Params -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="3B"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_memory"
+                    app:tint="@color/text_tertiary"/>
+                <TextView
+                    android:id="@+id/tv_meta_params"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="3B"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"/>
+            </LinearLayout>
 
-            <Space android:layout_width="16dp" android:layout_height="wrap_content" />
+            <Space android:layout_width="16dp" android:layout_height="wrap_content"/>
 
-            <!-- 大小 -->
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_size"/> <!-- 紫色图标 -->
-            <TextView
+            <!-- Size -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="2.1 GB"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_file_other"
+                    app:tint="@color/text_tertiary"/>
+                <TextView
+                    android:id="@+id/tv_meta_size"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="2.1 GB"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"/>
+            </LinearLayout>
 
-            <Space android:layout_width="16dp" android:layout_height="wrap_content" />
+            <Space android:layout_width="16dp" android:layout_height="wrap_content"/>
 
-            <!-- 量化 -->
-            <ImageView
-                android:layout_width="16dp"
-                android:layout_height="16dp"
-                android:src="@drawable/ic_timer"/> <!-- 灰色图标 -->
-            <TextView
+            <!-- Quantization -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
-                android:text="Q4_K_M"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/ic_timer"
+                    app:tint="@color/text_tertiary"/>
+                <TextView
+                    android:id="@+id/tv_meta_quant"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="4dp"
+                    android:text="Q4_K_M"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="12sp"/>
+            </LinearLayout>
         </LinearLayout>
 
-        <!-- ================= 状态 A: 已就绪 (Ready Group) ================= -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/group_ready"
+        <!-- D. Action Area -->
+        <FrameLayout
+            android:id="@+id/container_actions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/layout_specs"
-            tools:visibility="visible">
+            app:layout_constraintTop_toBottomOf="@id/layout_metadata">
 
-            <TextView
-                android:id="@+id/tv_last_used"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="最后使用: 刚刚"
-                android:textColor="@color/text_tertiary"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/btn_status_ready"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_model_card_status_ready"
-                android:paddingHorizontal="12dp"
-                android:paddingVertical="4dp"
-                android:text="已就绪"
-                android:textColor="@color/state_active_text"
-                android:textSize="12sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-
-        <!-- ================= 状态 B: 下载中 (Downloading Group) ================= -->
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/group_downloading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/layout_specs"
-            tools:visibility="visible">
-
-            <TextView
-                android:id="@+id/tv_download_label"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="下载中..."
-                android:textColor="@color/text_primary"
-                android:textSize="13sp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <TextView
-                android:id="@+id/tv_progress_percent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="65%"
-                android:textColor="@color/text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/progress_download"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                app:indicatorColor="@color/brand_primary"
-                app:layout_constraintTop_toBottomOf="@id/tv_download_label"
-                app:trackColor="#E8EAED"
-                app:trackCornerRadius="4dp"
-                tools:progress="65" />
-
-            <!-- 暂停按钮 (胶囊型) -->
+            <!-- 1. Not Downloaded: Download Button -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_pause"
-                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:id="@+id/btn_download"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="12dp"
-                android:insetTop="0dp"
-                android:insetBottom="0dp"
-                android:text="暂停下载"
-                android:textColor="@color/text_primary"
-                app:icon="@drawable/ic_pause"
+                android:layout_height="48dp"
+                android:backgroundTint="@color/total_black"
+                android:text="下载模型"
+                android:textColor="@android:color/white"
+                app:icon="@drawable/ic_download"
                 app:iconGravity="textStart"
-                app:iconTint="@color/text_primary"
-                app:layout_constraintTop_toBottomOf="@id/progress_download"
-                app:strokeColor="@color/divider" />
+                app:iconTint="@android:color/white"
+                app:cornerRadius="8dp"
+                android:visibility="gone"
+                tools:visibility="visible"/>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+            <!-- 2. Downloading -->
+            <LinearLayout
+                android:id="@+id/layout_downloading"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="gone">
 
-        <!-- ================= 状态 C: 未下载 (Action Group) ================= -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_download"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:layout_marginTop="16dp"
-            android:insetTop="0dp"
-            android:insetBottom="0dp"
-            android:text="下载模型"
-            android:visibility="visible"
-            app:backgroundTint="@color/brand_primary"
-            app:cornerRadius="20dp"
-            app:icon="@drawable/ic_download"
-            app:iconGravity="textStart"
-            app:layout_constraintTop_toBottomOf="@id/layout_specs" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                    
+                    <com.google.android.material.progressindicator.LinearProgressIndicator
+                        android:id="@+id/progress_bar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        app:trackCornerRadius="4dp"
+                        app:indicatorColor="@color/brand_primary"
+                        android:progress="65"/>
+
+                    <TextView
+                        android:id="@+id/tv_progress_percent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:text="65%"
+                        android:textColor="@color/text_primary"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_pause"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:layout_marginTop="12dp"
+                    android:backgroundTint="@color/brand_primary"
+                    android:text="暂停下载"
+                    android:textColor="@android:color/white"
+                    app:icon="@drawable/ic_pause"
+                    app:iconGravity="textStart"
+                    app:iconTint="@android:color/white"
+                    app:cornerRadius="8dp"/>
+            </LinearLayout>
+
+            <!-- 3. Ready / Active -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/layout_ready"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                tools:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tv_last_used"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="最后使用：刚刚"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent">
+                    
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_check"
+                        app:tint="#2E7D32"/>
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="4dp"
+                        android:text="已就绪"
+                        android:textColor="#2E7D32"
+                        android:textSize="12sp"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

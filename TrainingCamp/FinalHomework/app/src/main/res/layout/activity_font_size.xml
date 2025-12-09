@@ -32,13 +32,17 @@
             android:orientation="vertical">
 
             <!-- 模拟 用户 消息 -->
-            <include layout="@layout/item_msg_user" />
+            <include 
+                android:id="@+id/preview_msg_user"
+                layout="@layout/item_msg_user" />
 
             <Space
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/spacing_l" />
             <!-- 模拟 AI 消息 -->
-            <include layout="@layout/item_msg_ai" />
+            <include 
+                android:id="@+id/preview_msg_ai"
+                layout="@layout/item_msg_ai" />
 
 
         </LinearLayout>

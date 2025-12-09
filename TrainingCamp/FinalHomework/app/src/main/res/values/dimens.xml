@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Spacing System (4dp grid) -->
+    <dimen name="spacing_xxs">4dp</dimen>
+    <dimen name="spacing_xs">8dp</dimen>
+    <dimen name="spacing_s">12dp</dimen>
+    <dimen name="spacing_m">16dp</dimen>
+    <dimen name="spacing_l">24dp</dimen>
+    <dimen name="spacing_xl">32dp</dimen>
+
+    <!-- Component Sizes -->
+    <dimen name="icon_size_s">16dp</dimen>
+    <dimen name="icon_size_m">24dp</dimen>
+    <dimen name="icon_size_l">32dp</dimen>
+    <dimen name="avatar_size">36dp</dimen>
+    <dimen name="input_bar_min_height">56dp</dimen>
+
+    <!-- Corner Radius -->
+    <dimen name="radius_s">8dp</dimen>
+    <dimen name="radius_m">12dp</dimen>
+    <dimen name="radius_l">20dp</dimen> <!-- 气泡圆角 -->
+
+    <!-- Font Sizes -->
+    <dimen name="text_h1">22sp</dimen>
+    <dimen name="text_body">16sp</dimen>
+    <dimen name="text_caption">13sp</dimen>
+    <dimen name="text_small">11sp</dimen>
+</resources>

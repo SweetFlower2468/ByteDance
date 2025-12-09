@@ -12,15 +12,15 @@
     android:paddingHorizontal="16dp"
     android:paddingVertical="12dp">
 
-    <!-- 左侧图标 -->
+    <!-- 左侧图标 (带背景圆圈) -->
     <ImageView
         android:id="@+id/iv_icon"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:padding="8dp"
         android:src="@drawable/ic_volume_up"
-        app:tint="@color/white"
-        tools:background="@drawable/ic_volume_up" />
+        android:background="@drawable/bg_icon_circle"
+        app:tint="@color/white" />
 
     <!-- 标题 -->
     <TextView
@@ -33,7 +33,7 @@
         android:textSize="16sp"
         tools:text="声音设置" />
 
-    <!-- 右侧状态文字 (例如: 温柔桃子) -->
+    <!-- 右侧状态文字 -->
     <TextView
         android:id="@+id/tv_value"
         android:layout_width="wrap_content"
@@ -41,6 +41,7 @@
         android:layout_marginEnd="8dp"
         android:textColor="@color/text_secondary"
         android:textSize="13sp"
+        android:visibility="gone"
         tools:text="温柔桃子" />
 
     <!-- 右箭头 -->

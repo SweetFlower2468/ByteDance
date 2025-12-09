@@ -33,8 +33,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/spacing_s"
-                android:text="你好xxx 有什么可以帮助你的吗？"
-                android:textColor="@color/text_secondary"
+                android:text="你好User\n有什么可以帮助你的吗？"
+                android:textColor="@color/black"
+                android:textSize="28sp"
                 android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView

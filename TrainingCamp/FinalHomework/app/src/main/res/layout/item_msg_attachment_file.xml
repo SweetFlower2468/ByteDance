@@ -1,99 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content">
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/card_file"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?attr/selectableItemBackground"
-        app:cardBackgroundColor="@color/surface_card"
-        app:cardCornerRadius="@dimen/radius_m"
+    android:layout_height="60dp"
+    android:layout_marginEnd="8dp"
+    app:cardBackgroundColor="@android:color/white"
+    app:cardCornerRadius="8dp"
         app:cardElevation="0dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:strokeColor="@color/divider"
         app:strokeWidth="1dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        android:layout_height="match_parent"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:padding="@dimen/spacing_s">
+        android:paddingHorizontal="12dp">
 
-            <!--
-                【修改点】直接放置 ImageView，去掉了外面的 FrameLayout 和背景框
-                稍微调整了大小为 42dp，视觉更协调
-            -->
             <ImageView
                 android:id="@+id/iv_file_icon"
-                android:layout_width="42dp"
-                android:layout_height="42dp"
-                android:contentDescription="File Icon"
-                android:src="@drawable/ic_file_pdf" />
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_file_other" />
 
-            <!-- 右侧信息区 -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:orientation="vertical">
 
-                <!-- 文件名 -->
                 <TextView
                     android:id="@+id/tv_file_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:ellipsize="middle"
-                    android:maxWidth="200dp"
+                android:maxWidth="140dp"
                     android:singleLine="true"
-                    android:text="Project_Report_Final.pdf"
+                android:text="document.pdf"
                     android:textColor="@color/text_primary"
-                    android:textSize="@dimen/text_body"
+                android:textSize="14sp"
                     android:textStyle="bold" />
 
-                <!-- 底部元数据行 (大小 | Token) -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="2dp"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                    <!-- 文件大小 -->
                     <TextView
                         android:id="@+id/tv_file_size"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="2.4 MB"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_small" />
+                    android:text="2.5 MB"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp" />
 
-                    <!-- 竖线分隔符 -->
                     <View
                         android:layout_width="1dp"
                         android:layout_height="10dp"
-                        android:layout_marginHorizontal="8dp"
-                        android:background="@color/divider" />
+                    android:layout_marginHorizontal="6dp"
+                    android:background="@color/text_tertiary" />
 
-                    <!-- Token 数量 -->
                     <TextView
                         android:id="@+id/tv_token_count"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="1.2k tokens"
-                        android:textColor="@color/text_secondary"
-                        android:textSize="@dimen/text_small" />
-
-                </LinearLayout>
+                    android:text="1.2k Tokens"
+                    android:textColor="@color/text_tertiary"
+                    android:textSize="12sp" />
             </LinearLayout>
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/btn_remove_file"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginStart="16dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_close"
+            app:tint="@color/text_tertiary" />
+
+    </LinearLayout>
+
+    </com.google.android.material.card.MaterialCardView>

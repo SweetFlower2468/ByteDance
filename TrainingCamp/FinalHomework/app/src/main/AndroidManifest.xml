@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- 网络权限 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <application
+        android:name=".App"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FinalHomework">
+
+        <!-- 启动页 -->
+        <activity
+            android:name=".activity.splash.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.FinalHomework">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- 主界面 -->
+        <activity
+            android:name=".activity.main.ChatActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"
+            android:theme="@style/Theme.FinalHomework" />
+
+        <!-- 模型管理 -->
+        <activity
+            android:name=".activity.model.ModelManagerActivity"
+            android:exported="false" />
+
+        <!-- 个人中心 -->
+        <activity
+            android:name=".activity.profile.ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.profile.EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.profile.AboutActivity"
+            android:exported="false" />
+
+        <!-- 设置页面 -->
+        <activity
+            android:name=".activity.profile.settings.FontSizeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.profile.settings.BackgroundActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.profile.settings.VoiceSettingsActivity"
+            android:exported="false" />
+
+        <!-- 收藏 -->
+        <activity
+            android:name=".activity.favorites.FavoritesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.favorites.FavoriteDetailActivity"
+            android:exported="false" />
+
+        <!-- 历史记录 -->
+        <activity
+            android:name=".activity.history.HistoryActivity"
+            android:exported="false" />
+
+        <!-- 帮助与反馈 -->
+        <activity
+            android:name=".activity.feedback.HelpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.feedback.FeedbackSubmitActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activity.feedback.FeedbackHistoryActivity"
+            android:exported="false" />
+
+    </application>
+
+</manifest>

@@ -38,7 +38,6 @@
             android:padding="@dimen/spacing_m"
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_body"
-            android:textIsSelectable="true"
             app:layout_constraintTop_toBottomOf="@id/view_deep_think"
             tools:text="这是AI回复的正文内容。\n支持Markdown渲染，边框应该显示出来了。" />
 

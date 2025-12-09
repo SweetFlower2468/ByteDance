@@ -53,6 +53,7 @@
             android:textSize="14sp" />
 
         <ImageView
+            android:id="@+id/iv_model_arrow"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_triangle_left"
@@ -68,16 +69,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- 3.1 深度思考开关 (Toggle) -->
+        <!-- 3.1 新建会话按钮 (Add Circle) -->
         <ImageButton
-            android:id="@+id/btn_toggle_deep_think"
+            android:id="@+id/btn_new_session"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="Deep Think Toggle"
+            android:contentDescription="New Session"
             android:scaleType="centerInside"
-            android:src="@drawable/selector_brain_toggle"
-            tools:tint="@color/text_secondary"/> <!-- selector会自动处理颜色 -->
+            android:src="@drawable/ic_add_circle"
+            app:tint="@color/text_primary" />
 
         <!-- 3.2 历史记录 -->
         <ImageButton

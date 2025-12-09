@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Text Colors (Dark Mode) -->
+    <color name="text_primary">#E6E6E6</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_tertiary">#777777</color>
+    <color name="text_on_brand">#FFFFFF</color>
+
+    <!-- Background Surfaces (Dark Mode) -->
+    <color name="surface_background">#121212</color>
+    <color name="surface_card">#1E1E1E</color>
+    <color name="surface_bubble_ai">#2C2C2C</color>
+    <color name="surface_bubble_user">#0066FF</color> <!-- Keep brand color or slightly desaturate -->
+    <color name="surface_deep_think">#252525</color>
+
+    <!-- Functional Colors -->
+    <color name="divider">#333333</color>
+    
+    <!-- Keep brand colors same or adjust if needed -->
+    <color name="brand_primary">#4D94FF</color> <!-- Lighter blue for dark mode contrast -->
+    <color name="brand_primary_light">#1A2633</color>
+</resources>

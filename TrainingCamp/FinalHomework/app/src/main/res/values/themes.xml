@@ -1,0 +1,17 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base application theme. -->
+    <style name="Theme.FinalHomework" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- 主色调 -->
+        <item name="colorPrimary">@color/brand_primary</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/brand_primary_light</item>
+        <item name="colorOnPrimaryContainer">@color/brand_primary_dark</item>
+
+        <!-- 状态栏颜色 (白底黑字) -->
+        <item name="android:statusBarColor">@color/surface_background</item>
+        <item name="android:windowLightStatusBar">true</item>
+
+        <!-- 背景色 -->
+        <item name="android:colorBackground">@color/surface_background</item>
+    </style>
+</resources>

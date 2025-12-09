@@ -2,23 +2,24 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/surface_background">
 
-    <include
+    <com.edu.neu.finalhomework.activity.main.widget.ChatHeaderView
         android:id="@+id/chat_header"
-        layout="@layout/view_chat_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
     <!-- 底部阴影分割线 (滚动时显示) -->
     <View
+        android:id="@+id/divider"
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/divider"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"/>
+        app:layout_constraintTop_toBottomOf="@id/chat_header"/>
 
     <!-- 消息列表 -->
     <androidx.recyclerview.widget.RecyclerView
@@ -29,17 +30,16 @@
         android:paddingBottom="@dimen/spacing_s"
         android:paddingTop="@dimen/spacing_s"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toTopOf="@id/input_panel_stub"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        tools:listitem="@layout/item_msg_ai" />
+        app:layout_constraintBottom_toTopOf="@id/chat_input_panel"
+        app:layout_constraintTop_toBottomOf="@id/chat_header"
+        tools:listitem="@layout/item_msg_ai"
+        tools:ignore="NotSibling" />
 
     <!--
-      输入组件占位
-      注意：这里使用 include 引入独立的 input_panel 布局
+      输入组件
     -->
-    <include
-        android:id="@+id/input_panel_stub"
-        layout="@layout/view_input_panel"
+    <com.edu.neu.finalhomework.activity.main.widget.ChatInputPanel
+        android:id="@+id/chat_input_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent" />
