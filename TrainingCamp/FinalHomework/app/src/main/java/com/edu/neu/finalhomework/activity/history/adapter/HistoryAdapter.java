@@ -53,6 +53,7 @@ public class HistoryAdapter extends ListAdapter<Session, HistoryAdapter.ViewHold
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_session_avatar);
+            ivAvatar.setImageResource(R.drawable.ic_quote); // Set fixed icon
             tvTitle = itemView.findViewById(R.id.tv_session_title);
             tvLastMessage = itemView.findViewById(R.id.tv_last_message);
             tvTime = itemView.findViewById(R.id.tv_time);

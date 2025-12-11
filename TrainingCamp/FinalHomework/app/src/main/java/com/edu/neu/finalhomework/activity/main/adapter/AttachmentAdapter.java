@@ -29,13 +29,23 @@ public class AttachmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         public Uri uri;
         public String type;
         public String name;
-        public String size;
+        public String size;       // display size string (may include tokens)
+        public long sizeBytes;    // raw size in bytes
+        public int tokenCount;    // estimated tokens (if parsed)
+        public String extractedText; // optional cached text for reuse
 
         public Attachment(Uri uri, String type, String name, String size) {
+            this(uri, type, name, size, -1, 0, null);
+        }
+
+        public Attachment(Uri uri, String type, String name, String size, long sizeBytes, int tokenCount, String extractedText) {
             this.uri = uri;
             this.type = type;
             this.name = name;
             this.size = size;
+            this.sizeBytes = sizeBytes;
+            this.tokenCount = tokenCount;
+            this.extractedText = extractedText;
         }
     }
 
@@ -150,8 +160,8 @@ public class AttachmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             tvName.setText(item.name);
             tvSize.setText(item.size);
             if (tvToken != null) {
-                // Mock token count based on size or random
-                tvToken.setText("1.2k Tokens"); 
+                tvToken.setVisibility(View.VISIBLE);
+                tvToken.setText(formatTokens(item.tokenCount));
             }
             
             // Icon Logic
@@ -173,6 +183,15 @@ public class AttachmentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                      if (!isReadOnly && listener != null) listener.onRemove(item);
                 });
             }
+        }
+
+        private String formatTokens(int tokens) {
+            if (tokens <= 0) return "tokens";
+            if (tokens >= 1000) {
+                double k = tokens / 1000.0;
+                return String.format(java.util.Locale.US, "%.1fk tokens", k);
+            }
+            return tokens + " tokens";
         }
     }
 }

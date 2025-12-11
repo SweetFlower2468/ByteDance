@@ -14,7 +14,7 @@ import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
+import com.edu.neu.finalhomework.utils.ToastUtils;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.edu.neu.finalhomework.utils.ToastUtils;
 
 /**
  * 历史会话记录页面
@@ -127,7 +129,7 @@ public class HistoryActivity extends BaseActivity {
                 runOnUiThread(() -> {
                     allSessions.clear();
                     updateList(allSessions);
-                    Toast.makeText(this, "已清空所有记录", Toast.LENGTH_SHORT).show();
+                    ToastUtils.show(this, "已清空所有记录");
                 });
             });
         });

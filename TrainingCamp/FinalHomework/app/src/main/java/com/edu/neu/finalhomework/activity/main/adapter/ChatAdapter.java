@@ -25,6 +25,7 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private List<Message> messages;
     private OnMessageActionListener actionListener;
     private boolean isReadOnly = false;
+    private long playingMessageId = -1;
 
     public interface OnMessageActionListener {
         void onCopy(Message message);
@@ -45,6 +46,31 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     
     public void setReadOnly(boolean readOnly) {
         this.isReadOnly = readOnly;
+    }
+    
+    public void setPlayingMessageId(long id) {
+        long oldId = this.playingMessageId;
+        this.playingMessageId = id;
+        
+        // Notify old item to stop animation
+        if (oldId != -1) {
+            for (int i = 0; i < messages.size(); i++) {
+                if (messages.get(i).id == oldId) {
+                    notifyItemChanged(i, "tts_update");
+                    break;
+                }
+            }
+        }
+        
+        // Notify new item to start animation
+        if (id != -1) {
+            for (int i = 0; i < messages.size(); i++) {
+                if (messages.get(i).id == id) {
+                    notifyItemChanged(i, "tts_update");
+                    break;
+                }
+            }
+        }
     }
     
     @Override
@@ -83,13 +109,38 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        // Delegate to version with payloads if called directly without payloads
+        onBindViewHolder(holder, position, java.util.Collections.emptyList());
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position, @NonNull List<Object> payloads) {
         Message message = messages.get(position);
+        
+        if (!payloads.isEmpty()) {
+            // Handle partial updates
+            for (Object payload : payloads) {
+                if ("partial_update".equals(payload)) {
+                    if (holder instanceof AiMsgHolder) {
+                        ((AiMsgHolder) holder).bind(message, playingMessageId);
+                        return;
+                    }
+                } else if ("tts_update".equals(payload)) {
+                    if (holder instanceof AiMsgHolder) {
+                        ((AiMsgHolder) holder).updateTtsState(message.id == playingMessageId);
+                        return;
+                    }
+                }
+            }
+        }
+        
+        // Full bind
         if (holder instanceof UserMsgHolder) {
             ((UserMsgHolder) holder).bind(message);
         } else if (holder instanceof AiMsgHolder) {
             AiMsgHolder aiHolder = (AiMsgHolder) holder;
             aiHolder.setReadOnly(isReadOnly);
-            aiHolder.bind(message);
+            aiHolder.bind(message, playingMessageId);
         }
     }
     

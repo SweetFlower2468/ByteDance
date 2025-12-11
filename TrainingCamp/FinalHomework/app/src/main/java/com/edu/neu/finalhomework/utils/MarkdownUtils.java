@@ -1,49 +1,39 @@
 package com.edu.neu.finalhomework.utils;
 
-import android.content.Context;
-import android.text.Spanned;
-import io.noties.markwon.Markwon;
-import io.noties.markwon.ext.tables.TablePlugin;
-import io.noties.markwon.linkify.LinkifyPlugin;
-
-/**
- * Markdown 渲染工具类
- * 配置 Markwon 渲染器
- */
 public class MarkdownUtils {
-    
-    private static Markwon markwon;
-    
-    /**
-     * 初始化 Markwon
-     */
-    public static void init(Context context) {
-        markwon = Markwon.builder(context)
-                .usePlugin(TablePlugin.create(context))
-                .usePlugin(LinkifyPlugin.create())
-                .build();
+    public static String cleanMarkdown(String text) {
+        if (text == null) return "";
         
-        // 注意：如果需要图片支持，需要添加 GlideImagesPlugin
-        // 需要确保已添加依赖：io.noties.markwon:image-glide:4.6.2
-        // 然后取消下面的注释：
-        // import io.noties.markwon.image.glide.GlideImagesPlugin;
-        // .usePlugin(GlideImagesPlugin.create(context))
-    }
-    
-    /**
-     * 渲染 Markdown 文本
-     */
-    public static Spanned render(String markdown) {
-        if (markwon == null) {
-            throw new IllegalStateException("Markwon not initialized. Call init() first.");
-        }
-        return markwon.toMarkdown(markdown);
-    }
-    
-    /**
-     * 获取 Markwon 实例
-     */
-    public static Markwon getMarkwon() {
-        return markwon;
+        // Remove code block fences but KEEP content
+        // Remove ```language
+        text = text.replaceAll("```\\w*\\s*", "");
+        // Remove closing ```
+        text = text.replaceAll("```", "");
+        
+        // Remove inline code ticks
+        text = text.replaceAll("`", "");
+        
+        // Remove bold
+        text = text.replaceAll("\\*\\*([^*]*)\\*\\*", "$1");
+        
+        // Remove italic
+        text = text.replaceAll("\\*([^*]*)\\*", "$1");
+        
+        // Remove links [text](url) -> text
+        text = text.replaceAll("\\[([^]]*)\\]\\([^)]*\\)", "$1");
+        
+        // Remove images ![alt](url) -> 
+        text = text.replaceAll("!\\[([^]]*)\\]\\([^)]*\\)", "");
+        
+        // Remove headers #
+        text = text.replaceAll("(?m)^#+\\s*", "");
+        
+        // Remove blockquotes >
+        text = text.replaceAll("(?m)^>\\s*", "");
+        
+        // Remove horizontal rules
+        text = text.replaceAll("(?m)^-{3,}", "");
+        
+        return text.trim();
     }
 }

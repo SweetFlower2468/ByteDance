@@ -32,6 +32,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        com.tom_roush.pdfbox.android.PDFBoxResourceLoader.init(getApplicationContext());
         
         // 初始化数据库
         database = Room.databaseBuilder(
@@ -39,6 +40,8 @@ public class App extends Application {
                 AppDatabase.class,
                 "finalhomework_db"
         )
+        // 允许在主线程查询（仅用于调试，生产环境应禁用）
+        .allowMainThreadQueries()
         .fallbackToDestructiveMigration()
         .build();
         

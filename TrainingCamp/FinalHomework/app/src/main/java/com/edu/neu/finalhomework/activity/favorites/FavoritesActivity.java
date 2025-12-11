@@ -17,7 +17,7 @@ import com.edu.neu.finalhomework.App;
 import com.edu.neu.finalhomework.R;
 import com.edu.neu.finalhomework.activity.base.BaseActivity;
 import com.edu.neu.finalhomework.config.LimitConfig;
-import com.edu.neu.finalhomework.domain.entity.Message;
+import com.edu.neu.finalhomework.domain.entity.Favorite;
 import com.edu.neu.finalhomework.utils.TimeUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.util.ArrayList;
@@ -110,17 +110,15 @@ public class FavoritesActivity extends BaseActivity {
         isLoading = true;
         
         Executors.newSingleThreadExecutor().execute(() -> {
-            try { Thread.sleep(1000); } catch (InterruptedException e) {} 
-            
-            List<Message> newItems = App.getInstance().getDatabase().messageDao()
-                    .getFavoriteMessagesBefore(lastTimestamp, LimitConfig.FAVORITES_PAGE_SIZE);
+            List<Favorite> newItems = App.getInstance().getDatabase().favoriteDao()
+                    .getFavoritesBefore(lastTimestamp, LimitConfig.FAVORITES_PAGE_SIZE);
             
             runOnUiThread(() -> {
                 if (newItems.isEmpty()) {
                     isLastPage = true;
                 } else {
                     adapter.appendItems(newItems);
-                    lastTimestamp = newItems.get(newItems.size() - 1).timestamp;
+                    lastTimestamp = newItems.get(newItems.size() - 1).createdAt;
                     if (newItems.size() < LimitConfig.FAVORITES_PAGE_SIZE) {
                         isLastPage = true;
                     }
@@ -132,7 +130,7 @@ public class FavoritesActivity extends BaseActivity {
     
     private void performSearch(String keyword) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<Message> results = App.getInstance().getDatabase().messageDao().searchFavoriteMessages(keyword);
+            List<Favorite> results = App.getInstance().getDatabase().favoriteDao().searchFavorites(keyword);
             runOnUiThread(() -> {
                 adapter.setItems(results);
             });
@@ -140,14 +138,14 @@ public class FavoritesActivity extends BaseActivity {
     }
     
     class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.ViewHolder> {
-        List<Message> items = new ArrayList<>();
+        List<Favorite> items = new ArrayList<>();
         
-        void setItems(List<Message> items) {
+        void setItems(List<Favorite> items) {
             this.items = new ArrayList<>(items);
             notifyDataSetChanged();
         }
         
-        void appendItems(List<Message> newItems) {
+        void appendItems(List<Favorite> newItems) {
             int start = items.size();
             items.addAll(newItems);
             notifyItemRangeInserted(start, newItems.size());
@@ -166,20 +164,20 @@ public class FavoritesActivity extends BaseActivity {
 
         @Override
         public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            Message m = items.get(position);
-            holder.tvContent.setText(m.content);
-            holder.tvTime.setText(TimeUtils.getFriendlyTimeSpanByNow(m.timestamp));
+            Favorite m = items.get(position);
+            holder.tvQuestion.setText(m.userContent != null ? m.userContent : "(无提问)");
+            holder.tvAnswer.setText(m.aiContent != null ? m.aiContent : "(无回答)");
+            holder.tvTime.setText(TimeUtils.getFriendlyTimeSpanByNow(m.createdAt));
             
             holder.itemView.setOnClickListener(v -> {
                 Intent intent = new Intent(FavoritesActivity.this, FavoriteDetailActivity.class);
-                intent.putExtra("message_id", m.id);
+                intent.putExtra("favorite_id", m.id);
                 startActivity(intent);
             });
             
             holder.btnCancel.setOnClickListener(v -> {
                 Executors.newSingleThreadExecutor().execute(() -> {
-                    App.getInstance().getDatabase().messageDao().updateFavoriteStatus(m.id, false);
-                    m.isFavorite = false;
+                    App.getInstance().getDatabase().favoriteDao().deleteById(m.id);
                     runOnUiThread(() -> {
                          int pos = items.indexOf(m);
                          if (pos != -1) {
@@ -194,11 +192,12 @@ public class FavoritesActivity extends BaseActivity {
         @Override public int getItemCount() { return items.size(); }
 
         class ViewHolder extends RecyclerView.ViewHolder {
-            TextView tvContent, tvTime;
+            TextView tvQuestion, tvAnswer, tvTime;
             ImageView btnCancel;
             ViewHolder(View v) {
                 super(v);
-                tvContent = v.findViewById(R.id.tv_content);
+                tvQuestion = v.findViewById(R.id.tv_question);
+                tvAnswer = v.findViewById(R.id.tv_answer);
                 tvTime = v.findViewById(R.id.tv_time);
                 btnCancel = v.findViewById(R.id.btn_cancel_favorite);
             }

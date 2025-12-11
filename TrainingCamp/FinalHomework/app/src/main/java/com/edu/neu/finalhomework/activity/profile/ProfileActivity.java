@@ -21,6 +21,8 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.edu.neu.finalhomework.utils.ToastUtils;
+
 /**
  * 个人中心 Activity
  * 对应 activity_profile.xml
@@ -113,7 +115,7 @@ public class ProfileActivity extends BaseActivity {
                     startActivity(new Intent(this, HelpActivity.class));
                     break;
                 case ID_UPDATE:
-                    Toast.makeText(this, "已是最新版本", Toast.LENGTH_SHORT).show();
+                    ToastUtils.show(this, "已是最新版本");
                     break;
                 case ID_ABOUT:
                     startActivity(new Intent(this, AboutActivity.class));
@@ -134,7 +136,7 @@ public class ProfileActivity extends BaseActivity {
     private void initListeners() {
         btnEditProfile.setOnClickListener(v -> navigateToEditProfile());
         btnBack.setOnClickListener(v -> finish());
-        findViewById(R.id.btn_more).setOnClickListener(v -> Toast.makeText(this, "更多设置", Toast.LENGTH_SHORT).show());
+        findViewById(R.id.btn_more).setOnClickListener(v -> ToastUtils.show(this, "更多设置"));
     }
     
     private void navigateToEditProfile() {

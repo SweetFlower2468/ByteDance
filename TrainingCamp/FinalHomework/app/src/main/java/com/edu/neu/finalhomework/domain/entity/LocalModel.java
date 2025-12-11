@@ -34,9 +34,11 @@ public class LocalModel {
     public String apiUrl;
     public String apiKey;
     public boolean isDeepThink;
+    public String provider; // e.g., "doubao", "openai", "deepseek"
     public boolean isLocal = true; // Default true (downloaded or imported file)
     public boolean isBuiltIn = false; // Is it a built-in configuration model
     public String localPath;       // Absolute path for imported local models
+    public String downloadUrl;     // URL for downloading local models
     
     public String description;
     public long lastUseTime;

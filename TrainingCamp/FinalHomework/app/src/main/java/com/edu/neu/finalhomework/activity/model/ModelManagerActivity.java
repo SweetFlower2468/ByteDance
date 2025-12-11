@@ -24,6 +24,14 @@ import java.io.File;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.edu.neu.finalhomework.utils.ToastUtils;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import java.io.InputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 /**
  * 模型管理 Activity
  * 对应 activity_model_manager.xml
@@ -34,7 +42,6 @@ public class ModelManagerActivity extends BaseActivity {
     private ModelListAdapter adapter;
     private ImageView btnBack;
     private FloatingActionButton fabAdd;
-    private View btnFilter;
     private List<LocalModel> modelList; // Added field
     
     private TextView tvStorageUsage, tvModelCount, tvFreeSpace;
@@ -56,7 +63,6 @@ public class ModelManagerActivity extends BaseActivity {
         
         btnBack = findViewById(R.id.btn_back);
         fabAdd = findViewById(R.id.fab_add_model);
-        btnFilter = findViewById(R.id.btn_filter);
         
         tvStorageUsage = findViewById(R.id.tv_storage_usage);
         tvModelCount = findViewById(R.id.tv_model_count);
@@ -130,33 +136,85 @@ public class ModelManagerActivity extends BaseActivity {
         adapter = new ModelListAdapter(modelList, new ModelListAdapter.OnModelActionListener() {
             @Override
             public void onDownloadClick(LocalModel model) {
+                if (model.downloadUrl == null || model.downloadUrl.isEmpty()) {
+                    ToastUtils.show(ModelManagerActivity.this, "无下载地址");
+                    return;
+                }
+                
                 model.status = LocalModel.Status.DOWNLOADING;
                 model.downloadProgress = 0;
+                updateModelInDb(model);
                 adapter.notifyDataSetChanged();
-                updateModelInDb(model); // Update DB
-                Toast.makeText(ModelManagerActivity.this, "开始下载: " + model.name, Toast.LENGTH_SHORT).show();
+                ToastUtils.show(ModelManagerActivity.this, "开始下载: " + model.name);
                 
-                // Mock download progress
+                // Real Download Logic
                 new Thread(() -> {
-                    try {
-                        for (int i = 0; i <= 100; i += 5) {
-                            if (model.status != LocalModel.Status.DOWNLOADING) break;
-                            Thread.sleep(200);
-                            int finalI = i;
-                            model.downloadProgress = finalI;
-                            runOnUiThread(() -> adapter.notifyDataSetChanged());
+                    OkHttpClient client = new OkHttpClient();
+                    
+                    // Prepare File
+                    File dir = getExternalFilesDir("models");
+                    if (!dir.exists()) dir.mkdirs();
+                    
+                    File file;
+                    if (model.localPath != null && !model.localPath.isEmpty()) {
+                        file = new File(model.localPath);
+                    } else {
+                        file = new File(dir, model.name + ".gguf");
+                        model.localPath = file.getAbsolutePath(); // Update path
+                    }
+                    
+                    long existingLength = 0;
+                    if (file.exists()) {
+                        existingLength = file.length();
+                    }
+                    
+                    Request.Builder reqBuilder = new Request.Builder().url(model.downloadUrl);
+                    if (existingLength > 0) {
+                        reqBuilder.header("Range", "bytes=" + existingLength + "-");
+                    }
+                    Request request = reqBuilder.build();
+                    
+                    try (Response response = client.newCall(request).execute()) {
+                        // Handle 416 Range Not Satisfiable or 403 Forbidden (link might be valid but range rejected?)
+                        // If we sent a Range header and got error, retry without Range
+                        if (response.code() == 416 || (response.code() == 403 && existingLength > 0)) {
+                            // Close current response
+                            response.close();
+                            
+                            // Retry from scratch
+                            if (file.exists()) file.delete();
+                            
+                            Request retryRequest = new Request.Builder().url(model.downloadUrl).build();
+                            try (Response retryResponse = client.newCall(retryRequest).execute()) {
+                                handleDownloadResponse(retryResponse, file, model, totalBytes -> {});
+                            }
+                            return;
                         }
-                        if (model.status == LocalModel.Status.DOWNLOADING) {
-                            model.status = LocalModel.Status.READY;
-                            updateModelInDb(model); // Update DB
-                            createDummyModelFile(model.name);
-                            runOnUiThread(() -> {
-                                adapter.notifyDataSetChanged();
-                                updateStorageInfo();
-                            });
+
+                        if (!response.isSuccessful()) {
+                            if (response.code() == 403) {
+                                // Log full response for debugging
+                                android.util.Log.e("DownloadDebug", "403 Forbidden in main request. " + response.toString());
+                                throw new IOException("Access Forbidden (403)");
+                            }
+                            throw new IOException("Unexpected code " + response);
                         }
-                    } catch (InterruptedException e) {
+                        
+                        handleDownloadResponse(response, file, model, totalBytes -> {});
+                        
+                    } catch (Exception e) {
                         e.printStackTrace();
+                        // Log the full exception message
+                        android.util.Log.e("DownloadDebug", "Download failed", e);
+                        
+                        model.status = LocalModel.Status.PAUSED; // Change to Paused on error to allow retry
+                        // model.downloadProgress keep as is
+                        updateModelInDb(model);
+                        runOnUiThread(() -> {
+                            adapter.notifyDataSetChanged();
+                            // Simplify Toast message for user
+                            ToastUtils.show(ModelManagerActivity.this, "下载失败");
+                        });
                     }
                 }).start();
             }
@@ -166,21 +224,21 @@ public class ModelManagerActivity extends BaseActivity {
                 model.status = LocalModel.Status.PAUSED;
                 updateModelInDb(model); // Update DB
                 adapter.notifyDataSetChanged();
-                Toast.makeText(ModelManagerActivity.this, "已暂停", Toast.LENGTH_SHORT).show();
+                ToastUtils.show(ModelManagerActivity.this, "已暂停");
             }
             
             @Override
             public void onResumeClick(LocalModel model) {
-                model.status = LocalModel.Status.DOWNLOADING;
-                updateModelInDb(model); // Update DB
-                adapter.notifyDataSetChanged();
-                Toast.makeText(ModelManagerActivity.this, "继续下载", Toast.LENGTH_SHORT).show();
+                // Resume logic is basically restart download for now (simplification)
+                // To support resume, we'd need Range headers, which complicates things slightly.
+                // For now, let's treat resume as retry.
+                onDownloadClick(model);
             }
 
             @Override
             public void onItemClick(LocalModel model) {
                 if (model.status == LocalModel.Status.READY || model.status == LocalModel.Status.ACTIVE) {
-                     Toast.makeText(ModelManagerActivity.this, "切换到: " + model.name, Toast.LENGTH_SHORT).show();
+                     ToastUtils.show(ModelManagerActivity.this, "切换到: " + model.name);
                      
                      Executors.newSingleThreadExecutor().execute(() -> {
                          // Update DB
@@ -196,30 +254,29 @@ public class ModelManagerActivity extends BaseActivity {
 
             @Override
             public void onDeleteClick(LocalModel model) {
-                new AlertDialog.Builder(ModelManagerActivity.this)
-                    .setTitle("删除模型")
-                    .setMessage("确定要删除 " + model.name + " 吗？" + (model.isBuiltIn ? "内置模型将重置为未下载状态。" : "这将从设备中彻底移除该模型。"))
-                    .setPositiveButton("删除", (dialog, which) -> {
-                        deleteModelFile(model.name);
-                        
-                        Executors.newSingleThreadExecutor().execute(() -> {
-                            if (model.isBuiltIn) {
-                                // Built-in model: Reset status
-                                model.status = LocalModel.Status.NOT_DOWNLOADED;
-                                model.downloadProgress = 0;
-                                App.getInstance().getDatabase().modelDao().updateModel(model);
-                            } else {
-                                // Imported model: Delete completely
-                                App.getInstance().getDatabase().modelDao().deleteModel(model);
-                            }
-                            loadModelsFromDb();
+                confirmDeleteModel(model);
+            }
+
+            @Override
+            public void onEditClick(LocalModel model) {
+                ImportModelDialogFragment dialog = new ImportModelDialogFragment();
+                dialog.setEditModel(model);
+                dialog.setOnModelImportListener(new ImportModelDialogFragment.OnModelImportListener() {
+                    @Override
+                    public void onImport(LocalModel updatedModel) {
+                        updateModelInDb(updatedModel);
+                        runOnUiThread(() -> {
+                            loadModelsFromDb(); // Reload to reflect changes
+                            ToastUtils.show(ModelManagerActivity.this, "模型已更新");
                         });
-                        
-                        updateStorageInfo();
-                        Toast.makeText(ModelManagerActivity.this, "已删除模型", Toast.LENGTH_SHORT).show();
-                    })
-                    .setNegativeButton("取消", null)
-                    .show();
+                    }
+
+                    @Override
+                    public void onDelete(LocalModel model) {
+                        confirmDeleteModel(model);
+                    }
+                });
+                dialog.show(getSupportFragmentManager(), "EditModelDialog");
             }
         });
         
@@ -227,46 +284,96 @@ public class ModelManagerActivity extends BaseActivity {
         loadModelsFromDb();
     }
     
+    private void confirmDeleteModel(LocalModel model) {
+        boolean hasUrl = (model.downloadUrl != null && !model.downloadUrl.isEmpty());
+        File file = (model.localPath != null) ? new File(model.localPath) : null;
+        boolean fileExists = (file != null && file.exists());
+        
+        String message;
+        if (hasUrl && fileExists) {
+            message = "删除已下载的模型文件？\n（记录将保留，可重新下载）";
+        } else {
+            message = "彻底删除此模型记录？";
+        }
+
+        new AlertDialog.Builder(ModelManagerActivity.this)
+            .setTitle("删除模型")
+            .setMessage(message)
+            .setPositiveButton("删除", (dialog, which) -> {
+                Executors.newSingleThreadExecutor().execute(() -> {
+                    if (hasUrl && fileExists) {
+                        // Step 1: Delete file, reset status
+                        if (file.delete()) {
+                            model.status = LocalModel.Status.NOT_DOWNLOADED;
+                            model.downloadProgress = 0;
+                            App.getInstance().getDatabase().modelDao().updateModel(model);
+                            runOnUiThread(() -> {
+                                ToastUtils.show(ModelManagerActivity.this, "已删除模型文件");
+                                loadModelsFromDb(); // Refresh UI
+                                updateStorageInfo();
+                            });
+                        } else {
+                                runOnUiThread(() -> ToastUtils.show(ModelManagerActivity.this, "删除文件失败"));
+                        }
+                    } else {
+                        // Step 2: Delete record
+                        if (file != null && file.exists()) file.delete(); 
+                        App.getInstance().getDatabase().modelDao().deleteModel(model);
+                        runOnUiThread(() -> {
+                            ToastUtils.show(ModelManagerActivity.this, "已删除模型记录");
+                            loadModelsFromDb();
+                            updateStorageInfo();
+                        });
+                    }
+                });
+            })
+            .setNegativeButton("取消", null)
+            .show();
+    }
+
+    
     private void updateModelInDb(LocalModel model) {
         Executors.newSingleThreadExecutor().execute(() -> {
             App.getInstance().getDatabase().modelDao().updateModel(model);
         });
     }
 
+    private void insertModelToDb(LocalModel model) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            App.getInstance().getDatabase().modelDao().insertModel(model);
+            runOnUiThread(() -> {
+                loadModelsFromDb();
+                ToastUtils.show(ModelManagerActivity.this, "添加成功");
+            });
+        });
+    }
+
     private void loadModelsFromDb() {
         Executors.newSingleThreadExecutor().execute(() -> {
-            List<LocalModel> dbList = App.getInstance().getDatabase().modelDao().getAllModels();
-            List<LocalModel> configList = ModelConfig.getBuiltInModels();
+            android.content.SharedPreferences sp = getSharedPreferences("app_config", android.content.Context.MODE_PRIVATE);
+            boolean isInit = sp.getBoolean("models_initialized", false);
             
-            // Check for missing built-in models
-            boolean changed = false;
-            for (LocalModel configModel : configList) {
-                boolean exists = false;
-                for (LocalModel dbModel : dbList) {
-                    // Check by name and version
-                    if (dbModel.name.equals(configModel.name) && dbModel.version.equals(configModel.version)) {
-                        exists = true;
-                        // Optional: update metadata if config changed (not implemented here to preserve user status)
-                        // If we want to strictly enforce built-in flag:
-                        if (!dbModel.isBuiltIn) {
-                            dbModel.isBuiltIn = true;
-                            App.getInstance().getDatabase().modelDao().updateModel(dbModel);
+            if (!isInit) {
+                List<LocalModel> dbList = App.getInstance().getDatabase().modelDao().getAllModels();
+                List<LocalModel> configList = ModelConfig.getBuiltInModels();
+                
+                // Initialize built-in models only once
+                for (LocalModel configModel : configList) {
+                    boolean exists = false;
+                    for (LocalModel dbModel : dbList) {
+                        if (dbModel.name.equals(configModel.name) && dbModel.version.equals(configModel.version)) {
+                            exists = true;
+                            break;
                         }
-                        break;
+                    }
+                    if (!exists) {
+                        App.getInstance().getDatabase().modelDao().insertModel(configModel);
                     }
                 }
-                
-                if (!exists) {
-                    App.getInstance().getDatabase().modelDao().insertModel(configModel);
-                    changed = true;
-                }
+                sp.edit().putBoolean("models_initialized", true).apply();
             }
             
-            if (changed) {
-                dbList = App.getInstance().getDatabase().modelDao().getAllModels();
-            }
-            
-            List<LocalModel> finalDbList = dbList;
+            List<LocalModel> finalDbList = App.getInstance().getDatabase().modelDao().getAllModels();
             runOnUiThread(() -> {
                 modelList.clear();
                 modelList.addAll(finalDbList);
@@ -311,20 +418,164 @@ public class ModelManagerActivity extends BaseActivity {
         
         fabAdd.setOnClickListener(v -> {
             ImportModelDialogFragment dialog = new ImportModelDialogFragment();
-            dialog.setOnModelImportListener(model -> {
-                Executors.newSingleThreadExecutor().execute(() -> {
-                    long id = App.getInstance().getDatabase().modelDao().insertModel(model);
-                    model.id = id;
-                    runOnUiThread(() -> {
-                        loadModelsFromDb();
-                        updateStorageInfo();
-                        Toast.makeText(this, "已添加模型: " + model.name, Toast.LENGTH_SHORT).show();
-                    });
-                });
+            dialog.setOnModelImportListener(new ImportModelDialogFragment.OnModelImportListener() {
+                @Override
+                public void onImport(LocalModel model) {
+                    // If localPath is a content URI, copy it to app storage
+                    if (model.isLocal && model.localPath != null && model.localPath.startsWith("content://")) {
+                         ToastUtils.show(ModelManagerActivity.this, "正在导入模型文件...");
+                         new Thread(() -> {
+                             try {
+                                 android.net.Uri uri = android.net.Uri.parse(model.localPath);
+                                 String filename = model.name + ".gguf";
+                                 File destDir = getExternalFilesDir("models");
+                                 if (!destDir.exists()) destDir.mkdirs();
+                                 File destFile = new File(destDir, filename);
+                                 
+                                 InputStream is = getContentResolver().openInputStream(uri);
+                                 if (is == null) throw new IOException("Cannot open input stream");
+                                 
+                                 FileOutputStream fos = new FileOutputStream(destFile);
+                                 byte[] buffer = new byte[8192];
+                                 int read;
+                                 while ((read = is.read(buffer)) != -1) {
+                                     fos.write(buffer, 0, read);
+                                 }
+                                 fos.flush();
+                                 fos.close();
+                                 is.close();
+                                 
+                                 model.localPath = destFile.getAbsolutePath();
+                                 model.status = LocalModel.Status.READY;
+                                 model.downloadProgress = 100;
+                                 
+                                 insertModelToDb(model);
+                                 
+                             } catch (Exception e) {
+                                 runOnUiThread(() -> ToastUtils.show(ModelManagerActivity.this, "导入失败: " + e.getMessage()));
+                             }
+                         }).start();
+                    } else {
+                        insertModelToDb(model);
+                    }
+                }
+
+                @Override
+                public void onDelete(LocalModel model) {
+                    // New model creation, delete does nothing or cancels
+                    // Actually delete button shouldn't be visible for new models
+                }
             });
             dialog.show(getSupportFragmentManager(), "ImportModelDialog");
         });
         
-        btnFilter.setOnClickListener(v -> Toast.makeText(this, "筛选", Toast.LENGTH_SHORT).show());
+        // Search functionality
+        android.widget.EditText etSearch = findViewById(R.id.et_search);
+        if (etSearch != null) {
+            etSearch.addTextChangedListener(new android.text.TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    filterModels(s.toString());
+                }
+
+                @Override
+                public void afterTextChanged(android.text.Editable s) {}
+            });
+        }
+    }
+    
+    private void handleDownloadResponse(Response response, File file, LocalModel model, java.util.function.Consumer<Long> progressCallback) throws IOException {
+        if (!response.isSuccessful()) {
+            if (response.code() == 403) {
+                // Log the full 403 response details for debugging
+                android.util.Log.e("DownloadDebug", "403 Forbidden Error. Details: " + response.toString());
+                throw new IOException("链接已失效或禁止访问 (403)");
+            }
+            throw new IOException("Unexpected code " + response);
+        }
+        
+        long totalBytes = response.body().contentLength();
+        boolean isResume = (response.code() == 206);
+        long existingLength = isResume ? file.length() : 0;
+        
+        if (isResume) {
+            totalBytes += existingLength;
+        }
+        
+        InputStream is = response.body().byteStream();
+        
+        // Use append mode only if resuming (206)
+        FileOutputStream fos = new FileOutputStream(file, isResume);
+        
+        byte[] buffer = new byte[8192];
+        int read;
+        long downloadedBytes = existingLength;
+        
+        while ((read = is.read(buffer)) != -1) {
+            // Check pause/cancel status
+            if (model.status != LocalModel.Status.DOWNLOADING) {
+                // Close streams and exit
+                fos.close();
+                is.close();
+                return; // Stop thread
+            }
+            
+            fos.write(buffer, 0, read);
+            downloadedBytes += read;
+            
+            if (totalBytes > 0) {
+                int progress = (int) (downloadedBytes * 100 / totalBytes);
+                // Throttle updates
+                if (progress > model.downloadProgress) {
+                    model.downloadProgress = progress;
+                    runOnUiThread(() -> adapter.notifyDataSetChanged());
+                }
+            }
+        }
+        
+        fos.flush();
+        fos.close();
+        is.close();
+        
+        // Success
+        model.status = LocalModel.Status.READY;
+        model.downloadProgress = 100;
+        updateModelInDb(model);
+        runOnUiThread(() -> {
+            adapter.notifyDataSetChanged();
+            updateStorageInfo();
+            ToastUtils.show(ModelManagerActivity.this, "下载完成");
+        });
+    }
+    
+    private void filterModels(String query) {
+        if (adapter == null) return;
+        
+        List<LocalModel> filteredList = new ArrayList<>();
+        
+        // Query DB to filter
+        Executors.newSingleThreadExecutor().execute(() -> {
+            List<LocalModel> allModels = App.getInstance().getDatabase().modelDao().getAllModels();
+            if (query == null || query.isEmpty()) {
+                filteredList.addAll(allModels);
+            } else {
+                String lowerQuery = query.toLowerCase();
+                for (LocalModel m : allModels) {
+                    if (m.name.toLowerCase().contains(lowerQuery) || 
+                        (m.description != null && m.description.toLowerCase().contains(lowerQuery))) {
+                        filteredList.add(m);
+                    }
+                }
+            }
+            
+            runOnUiThread(() -> {
+                modelList.clear();
+                modelList.addAll(filteredList);
+                adapter.notifyDataSetChanged();
+            });
+        });
     }
 }

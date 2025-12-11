@@ -156,16 +156,6 @@
                     android:textColorHint="@color/text_tertiary"
                     android:textSize="14sp" />
 
-        <ImageButton
-            android:id="@+id/btn_filter"
-                    android:layout_width="48dp"
-                    android:layout_height="48dp"
-            android:layout_marginStart="12dp"
-            android:background="@drawable/bg_btn_action_square2"
-            android:src="@drawable/ic_search" 
-            app:tint="@color/text_primary" />
-            <!-- Using ic_settings as filter icon placeholder or ic_menu_burger -->
-
             </LinearLayout>
 
     <!-- 4. RecyclerView -->

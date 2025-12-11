@@ -56,6 +56,12 @@ public class Message {
     // 是否点踩
     public boolean isDisliked;
     
+    // 是否正在生成 (用于显示 Loading 动画)
+    public boolean isGenerating;
+    
+    // UI State: 是否展开深度思考
+    public boolean isDeepThinkExpanded = true;
+    
     public Message() {
         this.timestamp = System.currentTimeMillis();
         this.isFavorite = false;

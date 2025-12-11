@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="16dp"
-    app:cardElevation="8dp"
-    app:cardBackgroundColor="@color/surface_card">
+    android:gravity="center_horizontal">
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="0dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:padding="8dp"
+        android:maxWidth="340dp"
+        android:minWidth="280dp"
+        android:layout_gravity="center_horizontal"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="@color/surface_card">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="520dp"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="16dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -33,165 +45,228 @@
             app:singleSelection="true">
 
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_type_local"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="本地模型" />
-
-            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_type_network"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="网络模型" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_type_local"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="本地模型" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
-        <FrameLayout
-            android:id="@+id/container_form"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:layout_marginTop="24dp">
 
-            <!-- 本地模型表单 -->
-            <LinearLayout
-                android:id="@+id/layout_local"
+            <FrameLayout
+                android:id="@+id/container_form"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                android:orientation="vertical">
+                android:layout_height="wrap_content">
 
-                <com.google.android.material.textfield.TextInputLayout
+                <!-- 本地模型表单 -->
+                <LinearLayout
+                    android:id="@+id/layout_local"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="模型名称">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_local_name"
+                    android:visibility="gone"
+                    android:orientation="vertical">
+                    
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="text" />
-                </com.google.android.material.textfield.TextInputLayout>
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+                        
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="模型名称">
 
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_local_name"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <ImageView
+                            android:id="@+id/btn_scan_dir"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="8dp"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_search"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            app:tint="@color/brand_primary"
+                            android:tooltipText="扫描应用目录"/>
+                    </LinearLayout>
+    
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+    
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:hint="模型路径 或 下载链接 (URL)">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_local_path"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="text" />
+                        </com.google.android.material.textfield.TextInputLayout>
+    
+                        <ImageView
+                            android:id="@+id/btn_browse_file"
+                            android:layout_width="48dp"
+                            android:layout_height="48dp"
+                            android:layout_marginStart="8dp"
+                            android:padding="12dp"
+                            android:src="@drawable/ic_file_upload"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            app:tint="@color/brand_primary"/>
+                    </LinearLayout>
+                    
+                    <!-- 本地模型不支持深度思考，隐藏该开关 -->
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_local_deep_think"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:visibility="gone"
+                        android:text="" />
+                        
+                </LinearLayout>
+
+                <!-- 网络模型表单 -->
                 <LinearLayout
+                    android:id="@+id/layout_network"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:orientation="vertical">
 
                     <com.google.android.material.textfield.TextInputLayout
-                        android:layout_width="0dp"
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:hint="模型路径 (.gguf/.bin)">
+                        android:hint="API 模板 / 供应商">
+
+                        <AutoCompleteTextView
+                            android:id="@+id/dropdown_provider"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="none"
+                            android:text="Doubao (Volcano Engine)" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="API 地址 (URL)">
 
                         <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/et_local_path"
+                            android:id="@+id/et_net_url"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textUri" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="32dp"
+                        android:hint="模型名称 (展示)">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_net_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="text" />
                     </com.google.android.material.textfield.TextInputLayout>
 
-                    <ImageView
-                        android:id="@+id/btn_browse_file"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_marginStart="8dp"
-                        android:padding="12dp"
-                        android:src="@drawable/ic_file_upload"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        app:tint="@color/brand_primary"/>
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="0dp"
+                        android:hint="模型调用名称 (Model ID)">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_net_model_id"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="0dp"
+                        android:hint="API Key">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/et_net_key"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textPassword" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_deep_think"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:text="支持深度思考" />
+
+                    <com.google.android.material.materialswitch.MaterialSwitch
+                        android:id="@+id/switch_vision"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="支持图片识别" />
+
                 </LinearLayout>
-            </LinearLayout>
-
-            <!-- 网络模型表单 -->
-            <LinearLayout
-                android:id="@+id/layout_network"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="API 地址 (URL)">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_net_url"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textUri" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="模型名称 (Model ID)">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_net_name"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="text" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:hint="API Key">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_net_key"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textPassword" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switch_deep_think"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="支持深度思考" />
-
-                <com.google.android.material.materialswitch.MaterialSwitch
-                    android:id="@+id/switch_vision"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="支持图片识别" />
-
-            </LinearLayout>
-        </FrameLayout>
+            </FrameLayout>
+        </androidx.core.widget.NestedScrollView>
 
         <!-- 底部按钮 -->
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:gravity="end">
+            android:layout_marginTop="32dp">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_cancel"
-                style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="8dp"
+                android:layout_alignParentStart="true"
                 android:text="取消"
-                android:textColor="@color/text_secondary" />
+                android:textColor="@color/text_primary"
+                app:backgroundTint="@color/light_gray"
+                app:cornerRadius="20dp"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_import"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
                 android:text="确认导入"
                 app:backgroundTint="@color/brand_primary" />
-        </LinearLayout>
+        </RelativeLayout>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
+</FrameLayout>

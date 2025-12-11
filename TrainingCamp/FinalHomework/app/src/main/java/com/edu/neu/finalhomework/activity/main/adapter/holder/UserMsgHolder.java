@@ -58,10 +58,36 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
             if (tvContent != null) tvContent.setText(message.content);
             
             // Handle Quote
-            if (message.quotedContent != null && !message.quotedContent.isEmpty()) {
+            String quoteToShow = null;
+            boolean hasQuote = (message.quotedMessageId != null) || (message.quotedContent != null && !message.quotedContent.isEmpty());
+            if (hasQuote) {
+                // 优先实时查 DB 的被引用消息内容
+                if (message.quotedMessageId != null) {
+                    com.edu.neu.finalhomework.domain.entity.Message ref =
+                            com.edu.neu.finalhomework.App.getInstance()
+                                    .getDatabase()
+                                    .messageDao()
+                                    .getMessageById(message.quotedMessageId);
+                    if (ref != null) {
+                        if (ref.content != null && !ref.content.isEmpty()) {
+                            quoteToShow = ref.content;
+                        } else if (ref.deepThink != null && !ref.deepThink.isEmpty()) {
+                            quoteToShow = ref.deepThink;
+                        }
+                    }
+                }
+                // 退回已存的 quotedContent
+                if (quoteToShow == null || quoteToShow.isEmpty()) {
+                    quoteToShow = message.quotedContent;
+                }
+                if (quoteToShow != null) {
+                    quoteToShow = quoteToShow.replaceAll("\\s+", " ").trim();
+                }
+                if (quoteToShow == null || quoteToShow.isEmpty()) quoteToShow = "(引用为空)";
+
                 if (quoteTextWrapper != null) {
                     quoteTextWrapper.setVisibility(View.VISIBLE);
-                    if (tvQuoteContent != null) tvQuoteContent.setText(message.quotedContent);
+                    if (tvQuoteContent != null) tvQuoteContent.setText(quoteToShow);
                 }
             } else {
                 if (quoteTextWrapper != null) quoteTextWrapper.setVisibility(View.GONE);
@@ -104,7 +130,14 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
         List<AttachmentAdapter.Attachment> adapterItems = new ArrayList<>();
         for (Attachment att : attachments) {
             Uri uri = Uri.parse(att.filePath);
-            adapterItems.add(new AttachmentAdapter.Attachment(uri, att.type, att.fileName, att.displaySize));
+            adapterItems.add(new AttachmentAdapter.Attachment(
+                    uri,
+                    att.type,
+                    att.fileName,
+                    att.displaySize,
+                    att.fileSize,
+                    att.tokenCount,
+                    null));
         }
         
         // Read-only adapter

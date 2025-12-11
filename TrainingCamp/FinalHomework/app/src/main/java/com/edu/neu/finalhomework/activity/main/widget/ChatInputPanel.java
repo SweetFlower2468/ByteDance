@@ -25,6 +25,9 @@ import com.edu.neu.finalhomework.domain.entity.Message;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.edu.neu.finalhomework.activity.main.adapter.AttachmentAdapter;
+import com.edu.neu.finalhomework.utils.TokenUtils;
+import com.edu.neu.finalhomework.utils.PdfUtils;
+import com.edu.neu.finalhomework.utils.ToastUtils;
 import java.util.ArrayList;
 import java.util.List;
 import androidx.transition.TransitionManager;
@@ -43,6 +46,7 @@ public class ChatInputPanel extends ConstraintLayout {
     private ImageButton btnSend;
     private ImageButton btnMoreFeatures; // Deep Think toggle in input row
     private View actionPanel; // Bottom tool panel
+    private ConstraintLayout innerLayout;
     
     // Preview containers
     private View layoutPreviewContainer;
@@ -61,11 +65,13 @@ public class ChatInputPanel extends ConstraintLayout {
     private enum State {
         IDLE,       // Input empty, panel closed -> Show ADD icon
         TYPING,     // Input has text -> Show SEND icon
-        PANEL_OPEN  // Input empty, panel open -> Show CLOSE icon
+        PANEL_OPEN, // Input empty, panel open -> Show CLOSE icon
+        GENERATING  // Generatng response -> Show STOP icon
     }
 
     private State currentState = State.IDLE;
     private boolean isDeepThinkEnabled = false;
+    private boolean isGenerating = false;
     private Message quotedMessage;
 
     private OnSendListener onSendListener;
@@ -73,6 +79,7 @@ public class ChatInputPanel extends ConstraintLayout {
 
     public interface OnSendListener {
         void onSend(String text, boolean isDeepThink, List<AttachmentAdapter.Attachment> attachments, Message quotedMessage);
+        default void onStop() {}
     }
 
     public interface OnActionClickListener {
@@ -100,6 +107,7 @@ public class ChatInputPanel extends ConstraintLayout {
     private void init() {
         LayoutInflater.from(getContext()).inflate(R.layout.view_input_panel, this, true);
 
+        innerLayout = findViewById(R.id.root_input_panel);
         etInput = findViewById(R.id.et_input);
         btnSend = findViewById(R.id.btn_send);
         btnMoreFeatures = findViewById(R.id.btn_more_features);
@@ -124,6 +132,10 @@ public class ChatInputPanel extends ConstraintLayout {
         setupActionButtons();
         setupListeners();
         updateState();
+        
+        // Restore Hand Mode
+        boolean isLeftHand = com.edu.neu.finalhomework.utils.SPUtils.getBoolean("input_hand_mode_left", false);
+        setHandMode(isLeftHand);
     }
 
     private void initAttachmentAdapter() {
@@ -213,14 +225,25 @@ public class ChatInputPanel extends ConstraintLayout {
         });
     }
 
+    public void setGenerating(boolean generating) {
+        this.isGenerating = generating;
+        updateState();
+    }
+
     private void handleSendButtonClick() {
         switch (currentState) {
+            case GENERATING:
+                if (onSendListener != null) {
+                    onSendListener.onStop();
+                }
+                break;
             case TYPING:
                 String text = etInput.getText().toString().trim();
                 if (!text.isEmpty() && onSendListener != null) {
-                    onSendListener.onSend(text, isDeepThinkEnabled, new ArrayList<>(attachmentAdapter.getItems()), quotedMessage);
+                    Message currentQuote = (layoutPreviewContainer.getVisibility() == View.VISIBLE) ? quotedMessage : null;
+                    onSendListener.onSend(text, isDeepThinkEnabled, new ArrayList<>(attachmentAdapter.getItems()), currentQuote);
                     etInput.setText(""); // Clear input
-                    clearQuote(); // Clear attachments after send
+                    clearQuote(); // Clear attachments and quote after send
                 }
                 break;
             case IDLE:
@@ -245,6 +268,14 @@ public class ChatInputPanel extends ConstraintLayout {
     }
 
     private void updateState() {
+        if (isGenerating) {
+            currentState = State.GENERATING;
+            btnSend.setImageResource(R.drawable.ic_stop_circle); // Use specific stop icon
+            btnSend.setBackgroundResource(R.drawable.bg_transparent_circle); // No background
+            btnSend.setImageTintList(getResources().getColorStateList(R.color.text_primary)); // Use primary text color (black/dark)
+            return;
+        }
+
         String text = etInput.getText().toString().trim();
         boolean hasText = !text.isEmpty();
         boolean isPanelVisible = actionPanel.getVisibility() == View.VISIBLE;
@@ -277,7 +308,6 @@ public class ChatInputPanel extends ConstraintLayout {
         if (actionPanel.getVisibility() == (visible ? View.VISIBLE : View.GONE)) return;
 
         if (animate) {
-            // End previous transitions only if we are starting a new one
             TransitionManager.endTransitions(this);
             
             TransitionSet transition = new TransitionSet()
@@ -286,20 +316,10 @@ public class ChatInputPanel extends ConstraintLayout {
                     .setDuration(200);
             
             TransitionManager.beginDelayedTransition(this, transition);
-        } else {
-            // If NOT animating, just clean up running transitions.
-            // DO NOT call beginDelayedTransition(this, null) as it enables AutoTransition
-            // which causes ghosting/pop-up effects during layout changes (like keyboard open).
-            TransitionManager.endTransitions(this);
         }
+        // If not animating, avoid calling TransitionManager methods to prevent conflicts with IME layout passes.
         
         actionPanel.setVisibility(visible ? View.VISIBLE : View.GONE);
-        
-        // Force layout update to ensure empty space is removed immediately
-        if (!visible) {
-            actionPanel.post(this::requestLayout);
-        }
-        
         updateState();
     }
     
@@ -308,6 +328,10 @@ public class ChatInputPanel extends ConstraintLayout {
     }
 
     private void toggleDeepThink() {
+        if (!btnMoreFeatures.isEnabled()) {
+            ToastUtils.show(getContext(), "本地模型不支持深度思考");
+            return;
+        }
         isDeepThinkEnabled = !isDeepThinkEnabled;
         updateDeepThinkUI();
         if (onActionClickListener != null) {
@@ -335,6 +359,14 @@ public class ChatInputPanel extends ConstraintLayout {
              TextView tv = actionDeepThink.findViewById(R.id.tv_label);
              if (iv != null) iv.setImageResource(isDeepThinkEnabled ? R.drawable.ic_brain_blue : R.drawable.ic_brain_gray);
              if (tv != null) tv.setText(isDeepThinkEnabled ? "深度思考(开)" : "深度思考");
+        }
+    }
+
+    public void setDeepThinkSupported(boolean supported) {
+        btnMoreFeatures.setEnabled(supported);
+        btnMoreFeatures.setAlpha(supported ? 1.0f : 0.5f);
+        if (!supported && isDeepThinkEnabled) {
+             toggleDeepThink(); // Turn off if currently on but not supported
         }
     }
 
@@ -377,7 +409,69 @@ public class ChatInputPanel extends ConstraintLayout {
         viewQuoteFileWrapper.setVisibility(View.VISIBLE);
 
         AttachmentAdapter.Attachment attachment = new AttachmentAdapter.Attachment(uri, type, name, size);
+        int insertIndex = attachmentAdapter.getItems().size();
         attachmentAdapter.add(attachment);
+
+        // Compute meta asynchronously to avoid blocking UI
+        new Thread(() -> {
+            // Persist permission if possible
+            try {
+                getContext().getContentResolver().takePersistableUriPermission(uri,
+                        android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            } catch (Exception ignored) {}
+            long sizeBytes = queryFileSize(uri);
+            String baseDisplay = (sizeBytes > 0) ? formatSize(sizeBytes) : size;
+            int tokenCount = 0;
+            String extractedText = null;
+
+            boolean isPdf = false;
+            if (type != null && type.toLowerCase().contains("pdf")) isPdf = true;
+            if (name != null && name.toLowerCase().endsWith(".pdf")) isPdf = true;
+            if (uri != null && uri.toString().toLowerCase().endsWith(".pdf")) isPdf = true;
+
+            if (isPdf) {
+                try {
+                    extractedText = PdfUtils.extractTextFromPdf(getContext(), uri);
+                    if (extractedText != null && !extractedText.isEmpty()) {
+                        tokenCount = TokenUtils.estimateTokens(extractedText);
+                        // String preview = extractedText.length() > 400 ? extractedText.substring(0, 400) + "..." : extractedText;
+                        // android.util.Log.i("AttachmentToken", "parsed_text_preview=" + preview);
+                        // android.util.Log.i("AttachmentToken", "parsed_text_full=" + extractedText);
+                    } else {
+                        tokenCount = 0; // explicit zero when parser returns null/empty
+                        // android.util.Log.w("AttachmentToken", "parsed_text_empty");
+                    }
+                } catch (Exception ignored) {
+                    tokenCount = 0;
+                    // android.util.Log.e("AttachmentToken", "parse_error", ignored);
+                }
+            }
+
+            attachment.sizeBytes = sizeBytes;
+            attachment.tokenCount = tokenCount;
+            attachment.extractedText = extractedText;
+            attachment.size = baseDisplay; // 仅尺寸，不在这里重复 token
+
+            android.util.Log.i("AttachmentToken", "name=" + name + " bytes=" + sizeBytes + " tokens=" + attachment.tokenCount);
+
+            post(() -> attachmentAdapter.notifyItemChanged(insertIndex));
+        }).start();
+    }
+
+    /**
+     * 在发送阶段重新解析出 token 时，回写到附件预览，避免 UI 仍显示 0。
+     */
+    public void updateAttachmentMeta(Uri uri, int tokenCount, String extractedText) {
+        List<AttachmentAdapter.Attachment> list = attachmentAdapter.getItems();
+        for (int i = 0; i < list.size(); i++) {
+            AttachmentAdapter.Attachment a = list.get(i);
+            if (a.uri != null && a.uri.equals(uri)) {
+                a.tokenCount = tokenCount;
+                if (extractedText != null) a.extractedText = extractedText;
+                attachmentAdapter.notifyItemChanged(i);
+                break;
+            }
+        }
     }
     
     /**
@@ -397,5 +491,76 @@ public class ChatInputPanel extends ConstraintLayout {
     
     public String getInputText() {
         return etInput.getText().toString();
+    }
+
+    /**
+     * 切换左右手布局
+     * @param isLeftHand true: 左手模式 (发送按钮在左), false: 右手模式 (发送按钮在右)
+     */
+    public void setHandMode(boolean isLeftHand) {
+        if (innerLayout == null) return;
+        
+        androidx.constraintlayout.widget.ConstraintSet constraintSet = new androidx.constraintlayout.widget.ConstraintSet();
+        constraintSet.clone(innerLayout);
+
+        if (isLeftHand) {
+            // Left Hand: Button on Left, Input on Right
+            // Clear existing
+            constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END);
+            constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START);
+            constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START);
+            constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END);
+
+            // Button -> Start of Parent
+            constraintSet.connect(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.START, dpToPx(8));
+            
+            // Input -> End of Button, End of Parent
+            constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START, R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END, dpToPx(8));
+            constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.END, dpToPx(12));
+            
+        } else {
+            // Right Hand: Button on Right, Input on Left (Default)
+            // Clear existing
+            constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END);
+            constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START);
+            constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START);
+            constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END);
+
+            // Button -> End of Parent
+            constraintSet.connect(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.END, dpToPx(8));
+
+            // Input -> Start of Parent, End of Button
+            constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.START, dpToPx(12));
+            constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END, R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START, dpToPx(8));
+        }
+        
+        androidx.transition.TransitionManager.beginDelayedTransition(innerLayout);
+        constraintSet.applyTo(innerLayout);
+    }
+    
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
+    private long queryFileSize(Uri uri) {
+        try (android.database.Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                if (sizeIndex != -1) {
+                    return cursor.getLong(sizeIndex);
+                }
+            }
+        } catch (Exception ignored) {}
+        return -1;
+    }
+
+    private String formatSize(long bytes) {
+        if (bytes < 1024) return bytes + " B";
+        double kb = bytes / 1024.0;
+        if (kb < 1024) return String.format(java.util.Locale.US, "%.1f KB", kb);
+        double mb = kb / 1024.0;
+        if (mb < 1024) return String.format(java.util.Locale.US, "%.1f MB", mb);
+        double gb = mb / 1024.0;
+        return String.format(java.util.Locale.US, "%.2f GB", gb);
     }
 }

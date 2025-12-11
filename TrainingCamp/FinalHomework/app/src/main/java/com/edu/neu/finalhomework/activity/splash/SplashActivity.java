@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+
+import com.edu.neu.finalhomework.R;
 import com.edu.neu.finalhomework.activity.base.BaseActivity;
 import com.edu.neu.finalhomework.activity.main.ChatActivity;
 
@@ -18,7 +20,7 @@ public class SplashActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // setContentView(R.layout.activity_splash);
+        setContentView(R.layout.activity_splash);
         
         // 延迟跳转到主界面
         new Handler(Looper.getMainLooper()).postDelayed(() -> {

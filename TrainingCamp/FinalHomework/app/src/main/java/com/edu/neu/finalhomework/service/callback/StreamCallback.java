@@ -23,5 +23,5 @@ public interface StreamCallback {
     /**
      * 发生错误
      */
-    void onError(String error);
+    void onError(String error, Throwable t);
 }

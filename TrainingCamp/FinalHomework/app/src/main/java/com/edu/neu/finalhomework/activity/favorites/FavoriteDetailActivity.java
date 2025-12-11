@@ -8,6 +8,7 @@ import com.edu.neu.finalhomework.R;
 import com.edu.neu.finalhomework.activity.base.BaseActivity;
 import com.edu.neu.finalhomework.activity.main.adapter.ChatAdapter;
 import com.edu.neu.finalhomework.domain.entity.Message;
+import com.edu.neu.finalhomework.domain.entity.Favorite;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,11 +25,11 @@ public class FavoriteDetailActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_favorite_detail);
         
-        long msgId = getIntent().getLongExtra("message_id", -1);
-        if (msgId == -1) { finish(); return; }
+        long favId = getIntent().getLongExtra("favorite_id", -1);
+        if (favId == -1) { finish(); return; }
         
         initViews();
-        loadData(msgId);
+        loadData(favId);
     }
     
     private void initViews() {
@@ -45,28 +46,29 @@ public class FavoriteDetailActivity extends BaseActivity {
     
     private void loadData(long id) {
         Executors.newSingleThreadExecutor().execute(() -> {
-            Message target = App.getInstance().getDatabase().messageDao().getMessageById(id);
-            if (target == null) return;
-            
+            Favorite fav = App.getInstance().getDatabase().favoriteDao().getById(id);
+            if (fav == null) return;
+
             List<Message> displayList = new ArrayList<>();
-            
-            if ("ai".equals(target.type)) {
-                // Find question
-                Message question = App.getInstance().getDatabase().messageDao().getPreviousMessage(target.sessionId, target.timestamp);
-                if (question != null) displayList.add(question);
-                displayList.add(target);
-            } else if ("user".equals(target.type)) {
-                displayList.add(target);
-                // Find answer
-                Message answer = App.getInstance().getDatabase().messageDao().getNextMessage(target.sessionId, target.timestamp);
-                if (answer != null) displayList.add(answer);
-            } else {
-                displayList.add(target);
+            if (fav.userContent != null) {
+                Message q = new Message();
+                q.type = "user";
+                q.content = fav.userContent;
+                q.timestamp = fav.createdAt - 1;
+                q.attachments = fav.userAttachments;
+                q.quotedContent = fav.userQuotedContent;
+                q.quotedMessageId = fav.userQuotedMessageId;
+                displayList.add(q);
             }
-            
-            runOnUiThread(() -> {
-                chatAdapter.updateMessages(displayList);
-            });
+            if (fav.aiContent != null) {
+                Message a = new Message();
+                a.type = "ai";
+                a.content = fav.aiContent;
+                a.timestamp = fav.createdAt;
+                displayList.add(a);
+            }
+
+            runOnUiThread(() -> chatAdapter.updateMessages(displayList));
         });
     }
 }

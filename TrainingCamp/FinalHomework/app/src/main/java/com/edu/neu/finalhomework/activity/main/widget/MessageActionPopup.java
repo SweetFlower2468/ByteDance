@@ -64,7 +64,7 @@ public class MessageActionPopup extends PopupWindow {
         setFocusable(true);
         setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         setOutsideTouchable(true);
-        setElevation(16);
+        setElevation(8);
 
         recyclerView = contentView.findViewById(R.id.recycler_popup_actions);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));

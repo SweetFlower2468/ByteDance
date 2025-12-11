@@ -6,6 +6,7 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import com.edu.neu.finalhomework.domain.entity.Feedback;
+import com.edu.neu.finalhomework.domain.entity.Favorite;
 import com.edu.neu.finalhomework.domain.entity.LocalModel;
 import com.edu.neu.finalhomework.domain.entity.Message;
 import com.edu.neu.finalhomework.domain.entity.Session;
@@ -20,9 +21,10 @@ import com.edu.neu.finalhomework.domain.entity.UserProfile;
         Session.class,
         LocalModel.class,
         UserProfile.class,
-        Feedback.class
+        Feedback.class,
+        Favorite.class
     },
-    version = 5,
+    version = 12,
     exportSchema = false
 )
 @TypeConverters({MessageTypeConverter.class})
@@ -32,4 +34,5 @@ public abstract class AppDatabase extends RoomDatabase {
     public abstract SessionDao sessionDao();
     public abstract ModelDao modelDao();
     public abstract FeedbackDao feedbackDao();
+    public abstract FavoriteDao favoriteDao();
 }

@@ -15,6 +15,8 @@ import com.edu.neu.finalhomework.domain.entity.Feedback;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.util.concurrent.Executors;
 
+import com.edu.neu.finalhomework.utils.ToastUtils;
+
 /**
  * 反馈提交 Activity
  * 对应 activity_feedback_submit.xml
@@ -78,7 +80,7 @@ public class FeedbackSubmitActivity extends BaseActivity {
     private void submitFeedback() {
         String content = etContent.getText().toString().trim();
         if (content.isEmpty()) {
-            Toast.makeText(this, "请输入反馈内容", Toast.LENGTH_SHORT).show();
+            ToastUtils.show(this, "请输入反馈内容");
             return;
         }
         
@@ -91,7 +93,7 @@ public class FeedbackSubmitActivity extends BaseActivity {
         Executors.newSingleThreadExecutor().execute(() -> {
             App.getInstance().getDatabase().feedbackDao().insert(feedback);
             runOnUiThread(() -> {
-                 Toast.makeText(this, "反馈提交成功", Toast.LENGTH_SHORT).show();
+                 ToastUtils.show(this, "反馈提交成功");
                  finish();
             });
         });

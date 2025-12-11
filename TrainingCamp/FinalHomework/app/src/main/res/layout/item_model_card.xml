@@ -24,43 +24,87 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Llama 3.2"
-            android:textColor="@color/text_primary"
+            android:textColor="@color/total_black"
             android:textSize="18sp"
             android:textStyle="bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintHorizontal_bias="0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/iv_brain"
+            android:layout_marginEnd="4dp"/>
+
+        <ImageView
+            android:id="@+id/iv_brain"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="4dp"
+            android:src="@drawable/ic_brain_blue"
+            android:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/tv_model_name"
+            app:layout_constraintTop_toTopOf="@id/tv_model_name"
+            app:layout_constraintBottom_toBottomOf="@id/tv_model_name"
+            app:layout_constraintEnd_toStartOf="@id/tv_status_active"
+            tools:visibility="visible"/>
 
         <!-- Status Badge (Active) -->
         <TextView
             android:id="@+id/tv_status_active"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="4dp"
             android:background="@drawable/bg_model_card_status_active"
             android:backgroundTint="#E8F5E9"
             android:paddingHorizontal="8dp"
-            android:paddingVertical="2dp"
+            android:paddingVertical="4dp"
             android:text="使用中"
             android:textColor="#2E7D32"
-            android:textSize="12sp"
+            android:textSize="10sp"
+            android:gravity="center"
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@id/tv_model_name"
-            app:layout_constraintStart_toEndOf="@id/tv_model_name"
+            app:layout_constraintStart_toEndOf="@id/iv_brain"
             app:layout_constraintTop_toTopOf="@id/tv_model_name"
+            app:layout_constraintEnd_toStartOf="@id/layout_top_actions"
             tools:visibility="visible" />
             
-        <!-- Menu / More -->
-        <ImageButton
-            android:id="@+id/btn_delete"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_trash_red"
-            app:tint="@color/error"
+        <!-- Actions Container (Top Right) -->
+        <LinearLayout
+            android:id="@+id/layout_top_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="@id/tv_model_name"
+            app:layout_constraintBottom_toBottomOf="@id/tv_model_name">
+
+            <ImageButton
+                android:id="@+id/btn_edit"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_settings"
+                app:tint="@color/text_secondary" />
+
+            <ImageButton
+                android:id="@+id/btn_delete"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:padding="6dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_trash_red"
+                app:tint="@color/error"
+                android:visibility="gone"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <!-- B. Description (Version) -->
         <TextView
@@ -71,7 +115,7 @@
             android:text="3B-Instruct"
             android:textColor="@color/text_secondary"
             android:textSize="14sp"
-            app:layout_constraintEnd_toStartOf="@id/btn_delete"
+            app:layout_constraintEnd_toStartOf="@id/layout_top_actions"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/tv_model_name" />
 

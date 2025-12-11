@@ -21,19 +21,19 @@
     <!-- 引用文本内容 -->
     <TextView
         android:id="@+id/tv_quote_content"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
         android:layout_marginEnd="8dp"
         android:ellipsize="end"
+        android:gravity="center_vertical|start"
         android:maxLines="1"
         android:singleLine="true"
-        android:text="引用: 之前提到的那个算法逻辑..."
-        android:textColor="@color/text_secondary"
+        android:text="引用预览..."
+        android:textColor="@android:color/black"
         android:textSize="13sp"
-        app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_close"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/indicator"
         app:layout_constraintTop_toTopOf="parent" />
 

@@ -16,6 +16,11 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        // Restrict to 64-bit to avoid 32-bit FP16 issues in llama.cpp
+        ndk {
+            abiFilters.add("arm64-v8a")
+        }
+
         // 用于 Room 数据库 Schema 导出
         javaCompileOptions {
             annotationProcessorOptions {
@@ -31,6 +36,20 @@ android {
         
         // 配置编译选项以处理 Kotlin metadata 兼容性
         multiDexEnabled = true
+        
+        externalNativeBuild {
+            cmake {
+                cppFlags += "-std=c++17"
+                arguments += "-DANDROID_STL=c++_shared"
+            }
+        }
+    }
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "3.22.1"
+        }
     }
 
     buildTypes {
@@ -43,8 +62,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     
     // 配置 Java 编译器选项，处理 Kotlin metadata 兼容性问题
@@ -130,6 +149,9 @@ dependencies {
     implementation("io.noties.markwon:image:4.6.2")
     implementation("io.noties.markwon:image-glide:4.6.2") // Glide 图片插件
     implementation("io.noties.markwon:linkify:4.6.2")
+    implementation("io.noties.markwon:ext-latex:4.6.2") // 公式渲染
+    implementation("io.noties.markwon:inline-parser:4.6.2") // 支持 $...$ 内联解析
+    implementation("ru.noties:jlatexmath-android:0.2.0") // LaTeX 渲染引擎
     implementation ("com.github.bumptech.glide:glide:4.16.0") // 图片加载
 
     // 5. 进阶功能支持
@@ -138,6 +160,6 @@ dependencies {
     implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
     // 字节跳动火山引擎 SDK (需自行导入 jar/aar)
     implementation("com.volcengine:volcengine-java-sdk-ark-runtime:0.2.50")
-    // llama.cpp 的 Android 绑定库通常需要引入对应的 .aar 或自行编译 .so
-    // implementation(files("libs/llama-android.aar"))
+    // PDF text extraction
+    implementation("com.tom-roush:pdfbox-android:2.0.27.0")
 }

@@ -16,7 +16,7 @@
         app:navigationIcon="@drawable/ic_triangle_left"
         app:title="智能体声音"
         app:titleCentered="true"
-        app:menu="@menu/menu_font" />
+        app:menu="@menu/menu_voice_settings" />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -45,6 +45,54 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <!-- API配置区域 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginBottom="16dp">
+                        
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Volcengine AppID"
+                            android:layout_marginBottom="8dp"
+                            app:boxBackgroundMode="outline"
+                            app:boxCornerRadiusTopStart="8dp"
+                            app:boxCornerRadiusTopEnd="8dp"
+                            app:boxCornerRadiusBottomStart="8dp"
+                            app:boxCornerRadiusBottomEnd="8dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_app_id"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:textSize="14sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Volcengine Token"
+                            app:boxBackgroundMode="outline"
+                            app:boxCornerRadiusTopStart="8dp"
+                            app:boxCornerRadiusTopEnd="8dp"
+                            app:boxCornerRadiusBottomStart="8dp"
+                            app:boxCornerRadiusBottomEnd="8dp">
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/et_token"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textPassword"
+                                android:textSize="14sp"/>
+                        </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+                    
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider"
+                        android:layout_marginBottom="16dp"/>
+
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -52,12 +100,16 @@
                         android:orientation="horizontal">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:id="@+id/iv_speaker_mock"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
                             android:src="@drawable/ic_volume_up"
-                            app:tint="@color/brand_primary"/>
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            app:tint="@color/brand_primary"
+                            android:padding="4dp"/>
 
                         <TextView
+                            android:id="@+id/tv_current_voice_name"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -67,12 +119,15 @@
                             android:textColor="@color/text_primary"
                             android:textSize="16sp" />
 
-                        <!-- 试听按钮 -->
+                        <!-- 重置按钮 -->
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:id="@+id/btn_reset"
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
                             android:src="@drawable/ic_refresh"
-                            app:tint="@color/text_secondary"/>
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            app:tint="@color/text_secondary"
+                            android:padding="4dp"/>
                     </LinearLayout>
 
                     <!-- 音高滑块 -->
@@ -87,18 +142,23 @@
                             android:text="音高"
                             android:textStyle="bold"/>
                         <com.google.android.material.slider.Slider
+                            android:id="@+id/slider_pitch"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:value="0.5"
+                            android:value="50"
+                            android:valueFrom="0"
+                            android:valueTo="100"
+                            android:stepSize="1"
                             app:thumbColor="@color/white"
                             app:thumbStrokeColor="@color/divider"
                             app:thumbStrokeWidth="1dp"
                             app:trackColorActive="@color/brand_primary"/>
                         <TextView
+                            android:id="@+id/tv_pitch_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="0"
+                            android:text="50"
                             android:textColor="@color/text_secondary"/>
                     </LinearLayout>
 
@@ -113,18 +173,23 @@
                             android:text="语速"
                             android:textStyle="bold"/>
                         <com.google.android.material.slider.Slider
+                            android:id="@+id/slider_speed"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:value="0.5"
+                            android:value="50"
+                            android:valueFrom="0"
+                            android:valueTo="100"
+                            android:stepSize="1"
                             app:thumbColor="@color/white"
                             app:thumbStrokeColor="@color/divider"
                             app:thumbStrokeWidth="1dp"
                             app:trackColorActive="@color/brand_primary"/>
                         <TextView
+                            android:id="@+id/tv_speed_value"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="1.0"
+                            android:text="50"
                             android:textColor="@color/text_secondary"/>
                     </LinearLayout>
 
@@ -139,28 +204,37 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/tab_recommended"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="推荐"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
-                    android:layout_marginEnd="24dp"/>
+                    android:layout_marginEnd="24dp"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground"/>
 
                 <TextView
+                    android:id="@+id/tab_female"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="女声"
                     android:textSize="16sp"
                     android:textColor="@color/text_secondary"
-                    android:layout_marginEnd="24dp"/>
+                    android:layout_marginEnd="24dp"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground"/>
 
                 <TextView
+                    android:id="@+id/tab_male"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="男声"
                     android:textSize="16sp"
-                    android:textColor="@color/text_secondary"/>
+                    android:textColor="@color/text_secondary"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground"/>
             </LinearLayout>
 
             <!-- 声音列表 (RecyclerView) -->

@@ -3,13 +3,15 @@ package com.edu.neu.finalhomework.activity.profile;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+
 import com.bumptech.glide.Glide;
 import com.edu.neu.finalhomework.R;
 import com.edu.neu.finalhomework.activity.base.BaseActivity;
 import com.edu.neu.finalhomework.utils.SPUtils;
+import com.edu.neu.finalhomework.utils.ToastUtils;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.imageview.ShapeableImageView;
 import com.google.android.material.textfield.TextInputEditText;
@@ -84,7 +86,7 @@ public class EditProfileActivity extends BaseActivity {
     private void saveProfile() {
         String nickname = etNickname.getText().toString().trim();
         if (nickname.isEmpty()) {
-            Toast.makeText(this, "昵称不能为空", Toast.LENGTH_SHORT).show();
+            ToastUtils.show(this, "昵称不能为空");
             return;
         }
         
@@ -93,7 +95,7 @@ public class EditProfileActivity extends BaseActivity {
             SPUtils.putString("user_avatar", currentAvatarUri);
         }
         
-        Toast.makeText(this, "保存成功", Toast.LENGTH_SHORT).show();
+        ToastUtils.show(this, "保存成功");
         finish();
     }
 }
