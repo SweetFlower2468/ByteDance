@@ -10,6 +10,8 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.OnBackPressedCallback;
+
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -41,11 +43,15 @@ import com.edu.neu.finalhomework.domain.dao.MessageDao;
 import com.edu.neu.finalhomework.domain.dao.SessionDao;
 import com.edu.neu.finalhomework.domain.entity.Session;
 import com.edu.neu.finalhomework.config.LimitConfig;
+
 import androidx.annotation.NonNull;
+
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
 import android.speech.tts.TextToSpeech;
+
 import java.util.Locale;
 
 import java.util.ArrayList;
@@ -58,6 +64,7 @@ import com.edu.neu.finalhomework.utils.PdfUtils;
 import com.edu.neu.finalhomework.utils.ToastUtils;
 import com.edu.neu.finalhomework.utils.TokenUtils;
 import com.edu.neu.finalhomework.utils.DeviceSpecUtil;
+
 import android.util.Log;
 
 /**
@@ -65,15 +72,15 @@ import android.util.Log;
  * 对应 activity_chat.xml (主控制器)
  */
 public class ChatActivity extends BaseActivity {
-    
+
     private ChatHeaderView chatHeader;
     private RecyclerView recyclerChat;
     private ChatInputPanel chatInputPanel;
     private ChatAdapter chatAdapter;
     private List<Message> messageList = new ArrayList<>();
-    
+
     private com.edu.neu.finalhomework.ml.HandRecognitionManager handManager;
-    
+
     private MessageDao messageDao;
     private SessionDao sessionDao;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -82,17 +89,18 @@ public class ChatActivity extends BaseActivity {
     private TextToSpeech tts;
     private boolean ttsReady = false;
     private long currentPlayingMessageId = -1;
-    private com.edu.neu.finalhomework.domain.entity.LocalModel currentActiveModel; // Added field
+    private com.edu.neu.finalhomework.domain.entity.LocalModel currentActiveModel; // 当前激活的本地模型
     private com.edu.neu.finalhomework.activity.main.controller.ChatController chatController;
-    
-    // Pagination
+
+    // 分页加载状态
     private boolean isLoading = false;
     private boolean isLastPage = false;
-    
+
     private ActivityResultLauncher<Intent> cameraLauncher;
     private ActivityResultLauncher<String> galleryLauncher;
     private ActivityResultLauncher<String> fileLauncher;
-    
+    private OnBackPressedCallback backPressedCallback;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,16 +108,17 @@ public class ChatActivity extends BaseActivity {
 
         // 动态调整本地推理 batch（分片）大小，提升生成速度
         com.edu.neu.finalhomework.config.ModelConfig.nBatch = DeviceSpecUtil.recommendBatch(getApplicationContext());
-        
-        // Init DB
+
+        // 初始化数据库
         messageDao = App.getInstance().getDatabase().messageDao();
         sessionDao = App.getInstance().getDatabase().sessionDao();
         sessionId = getIntent().getLongExtra("sessionId", -1);
-        
+
         initLaunchers();
         initViews();
-        
-        // Initialize Hand Recognition
+        setupBackPressedHandler();
+
+        // 初始化左右手识别
         handManager = new com.edu.neu.finalhomework.ml.HandRecognitionManager(this);
         handManager.setListener(isLeftHand -> {
             runOnUiThread(() -> {
@@ -118,24 +127,24 @@ public class ChatActivity extends BaseActivity {
                 }
             });
         });
-        
+
         initData();
         initListeners();
         initTTS();
-        
+
         chatController = new com.edu.neu.finalhomework.activity.main.controller.ChatController();
 
-        // Load active model info once on create (no message reload)
+        // 启动时加载一次当前激活模型（不重新拉取消息）
         refreshActiveModel(false);
     }
-    
+
     private void initTTS() {
         ttsReady = false;
         tts = new TextToSpeech(getApplicationContext(), status -> {
             if (status == TextToSpeech.SUCCESS) {
                 int result = tts.setLanguage(Locale.getDefault());
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    // Try English as fallback
+                    // 若默认语言不支持则回退英文
                     result = tts.setLanguage(Locale.US);
                 }
                 if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
@@ -147,7 +156,7 @@ public class ChatActivity extends BaseActivity {
                 tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
                     @Override
                     public void onStart(String utteranceId) {
-                        // Handled in onTts click
+                        // 在 onTts 点击逻辑中统一处理
                     }
 
                     @Override
@@ -176,9 +185,10 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
-    
+
     @Override
-    protected void onNewIntent(Intent intent) {        super.onNewIntent(intent);
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         setIntent(intent);
         long newSessionId = intent.getLongExtra("sessionId", -1);
         if (newSessionId != -1 && newSessionId != this.sessionId) {
@@ -192,7 +202,7 @@ public class ChatActivity extends BaseActivity {
             loadMoreMessages();
         }
     }
-    
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -250,7 +260,7 @@ public class ChatActivity extends BaseActivity {
             // 不弹窗，静默
         }
     }
-    
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -263,31 +273,40 @@ public class ChatActivity extends BaseActivity {
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        if (chatInputPanel.isPanelOpen()) {
-            chatInputPanel.setPanelVisibility(false);
-            return;
-        }
-        
-        long currentTime = System.currentTimeMillis();
-        if (currentTime - lastBackPressTime > 2000) {
-            ToastUtils.show(this, "再按一次退出应用");
-            lastBackPressTime = currentTime;
-        } else {
-            super.onBackPressed();
-        }
-    }
-    
     private long lastBackPressTime = 0;
+
+    /**
+     * 注册统一返回键处理：先收起面板，再双击退出应用
+     */
+    private void setupBackPressedHandler() {
+        backPressedCallback = new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                if (chatInputPanel != null && chatInputPanel.isPanelOpen()) {
+                    chatInputPanel.setPanelVisibility(false);
+                    return;
+                }
+                long currentTime = System.currentTimeMillis();
+                if (currentTime - lastBackPressTime > 2000) {
+                    ToastUtils.show(ChatActivity.this, "再按一次退出应用");
+                    lastBackPressTime = currentTime;
+                } else {
+                    // 默认行为：结束当前 Activity
+                    setEnabled(false);
+                    finish();
+                }
+            }
+        };
+        getOnBackPressedDispatcher().addCallback(this, backPressedCallback);
+    }
 
     private void initLaunchers() {
         cameraLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
                 if (result.getResultCode() == RESULT_OK) {
-                     ToastUtils.show(this, "照片已拍摄");
-                     // Logic to handle captured image (bitmap or uri)
+                    ToastUtils.show(this, "照片已拍摄");
+                    // 此处可补充处理拍摄结果（bitmap 或 URI）
                 }
             }
         );
@@ -306,10 +325,11 @@ public class ChatActivity extends BaseActivity {
             uri -> {
                 if (uri != null) {
                     try {
-                        // Try to persist permission when possible (ACTION_OPEN_DOCUMENT)
+                        // 如为 ACTION_OPEN_DOCUMENT，尝试持久化读权限
                         getContentResolver().takePersistableUriPermission(uri,
-                                Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    } catch (Exception ignored) {}
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    } catch (Exception ignored) {
+                    }
                     String[] info = getFileInfo(uri);
                     chatInputPanel.addAttachment(uri, "application/octet-stream", info[0], info[1]);
                 }
@@ -322,10 +342,10 @@ public class ChatActivity extends BaseActivity {
         recyclerChat = findViewById(R.id.recycler_chat);
         chatInputPanel = findViewById(R.id.chat_input_panel);
 
-        // Setup RecyclerView
+        // 初始化聊天列表 RecyclerView
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
-        // Disable simple item animator to prevent height change animations (twitching)
+        // 关闭默认动画以避免气泡高度抖动
         recyclerChat.setItemAnimator(null);
         recyclerChat.setLayoutManager(layoutManager);
         chatAdapter = new ChatAdapter(messageList);
@@ -333,7 +353,7 @@ public class ChatActivity extends BaseActivity {
         recyclerChat.setFocusable(false);
         recyclerChat.setFocusableInTouchMode(false);
         recyclerChat.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-        
+
         chatAdapter.setOnMessageActionListener(new ChatAdapter.OnMessageActionListener() {
             @Override
             public void onCopy(Message message) {
@@ -343,28 +363,28 @@ public class ChatActivity extends BaseActivity {
             @Override
             public void onTts(Message message) {
                 if (tts == null || !ttsReady) {
-                    initTTS(); // Try to re-init if null/not ready
+                    initTTS(); // 若未就绪则尝试重新初始化
                     ToastUtils.show(ChatActivity.this, "TTS不可用，请稍后再试");
                     return;
                 }
-                
+
                 if (message == null || message.content == null) return;
-                
-                // If clicking the same message that is currently playing
+
+                // 若再次点击当前播放的消息则停止播放
                 if (currentPlayingMessageId == message.id && tts.isSpeaking()) {
                     tts.stop();
                     currentPlayingMessageId = -1;
                     chatAdapter.setPlayingMessageId(-1);
                     return;
                 }
-                
-                // Stop any previous speech
+
+                // 停止之前的播放
                 tts.stop();
-                
-                // Clean markdown
+
+                // 清洗 Markdown
                 String textToSpeak = MarkdownUtils.cleanMarkdown(message.content);
-                
-                // Speak
+
+                // 执行朗读
                 int result = tts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, String.valueOf(message.id));
                 if (result == TextToSpeech.ERROR) {
                     ToastUtils.show(ChatActivity.this, "朗读失败");
@@ -385,36 +405,36 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onRegenerate(Message message) {
-                // Find user message before this AI message
+                // 找到该 AI 消息之前的用户消息
                 executor.execute(() -> {
                     Message userMsg = null;
                     int index = messageList.indexOf(message);
                     if (index > 0) {
-                         // Simple check: previous message
-                         Message prev = messageList.get(index - 1);
-                         if ("user".equals(prev.type)) {
-                             userMsg = prev;
-                         }
+                        // 简单取前一条消息
+                        Message prev = messageList.get(index - 1);
+                        if ("user".equals(prev.type)) {
+                            userMsg = prev;
+                        }
                     }
-                    
-                    // If not found in list (e.g. pagination?), query DB
+
+                    // 如列表中未找到（可能分页），可进一步查库
                     if (userMsg == null) {
-                         // Logic to find query from DB if needed, but for now assuming list context
+                        // 当前实现假定列表上下文足够，未额外查库
                     }
 
                     if (userMsg != null) {
-                        // Rebuild API prompt including quotes and files
+                        // 重建含引用/文件的 Prompt
                         String apiPrompt = buildApiPrompt(userMsg);
                         boolean isDeepThink = (message.deepThink != null);
                         if (currentActiveModel != null && currentActiveModel.isLocal) {
                             isDeepThink = false;
                         }
                         final boolean finalDeepThink = isDeepThink;
-                        
+
                         runOnUiThread(() -> {
                             ToastUtils.show(ChatActivity.this, "正在重新生成...");
-                            
-                            // Reset current AI message
+
+                            // 重置当前 AI 消息内容与状态
                             message.content = "";
                             message.deepThink = finalDeepThink ? "" : null;
                             message.isGenerating = true;
@@ -427,11 +447,11 @@ public class ChatActivity extends BaseActivity {
                             setRecyclerFocusDuringGeneration(true);
                             chatAdapter.notifyItemChanged(index);
                         });
-                        
-                        // Update DB
+
+                        // 更新数据库
                         messageDao.updateMessage(message);
-                        
-                        // Resend
+
+                        // 重新发送
                         sendChatRequest(apiPrompt, finalDeepThink, message, userMsg);
                     } else {
                         runOnUiThread(() -> ToastUtils.show(ChatActivity.this, "无法找到对应的用户提问"));
@@ -443,15 +463,15 @@ public class ChatActivity extends BaseActivity {
             public void onDelete(Message message) {
                 deleteMessage(message);
             }
-            
+
             @Override
             public void onLongClick(View view, Message message) {
                 showMessagePopup(view, message);
             }
         });
-        
+
         recyclerChat.setAdapter(chatAdapter);
-        
+
         recyclerChat.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
@@ -471,18 +491,18 @@ public class ChatActivity extends BaseActivity {
             }
         });
     }
-    
+
     private void copyText(String text) {
         ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
         ClipData clip = ClipData.newPlainText("chat_content", text);
         clipboard.setPrimaryClip(clip);
         ToastUtils.show(ChatActivity.this, "已复制到剪贴板");
     }
-    
+
     private void toggleFavorite(Message message) {
         boolean newState = !message.isFavorite;
         message.isFavorite = newState;
-        // Strip stray think tokens in content when toggling favorite
+        // 收藏/取消时去除残留的 <think> 标签
         if (message.content != null && (message.content.contains("<think>") || message.content.contains("</think>"))) {
             message.content = message.content.replace("<think>", "").replace("</think>", "");
         }
@@ -495,7 +515,7 @@ public class ChatActivity extends BaseActivity {
                 fav.messageId = message.id;
                 fav.aiMessageId = "ai".equals(message.type) ? message.id : null;
                 fav.userMessageId = "user".equals(message.type) ? message.id : null;
-                // 关联问答对
+                // 关联问答：AI 消息关联前一条用户消息
                 if ("ai".equals(message.type)) {
                     Message q = messageDao.getPreviousMessage(message.sessionId, message.timestamp);
                     if (q != null && "user".equals(q.type)) {
@@ -531,7 +551,7 @@ public class ChatActivity extends BaseActivity {
             });
         });
     }
-    
+
     private void deleteMessage(Message message) {
         if (chatInputPanel.getQuotedMessage() == message) {
             chatInputPanel.clearQuote();
@@ -545,7 +565,7 @@ public class ChatActivity extends BaseActivity {
             });
         });
     }
-    
+
     private void showMessagePopup(View anchor, Message message) {
         new MessageActionPopup(this, (actionId, msg) -> {
             switch (actionId) {
@@ -577,18 +597,18 @@ public class ChatActivity extends BaseActivity {
                     break;
                 case MessageActionPopup.ACTION_TTS:
                     if (tts == null) {
-                        initTTS(); // Try to re-init
+                        initTTS(); // 若未初始化尝试重建
                         ToastUtils.show(ChatActivity.this, "正在初始化TTS，请稍后重试");
                     } else if (message != null && message.content != null) {
-                        // Reuse onTts logic logic to ensure consistent state
-                        // Stop any previous speech
+                        // 复用 onTts 逻辑保持状态一致
+                        // 停止之前的播放
                         tts.stop();
-                        
+
                         String textToSpeak = MarkdownUtils.cleanMarkdown(message.content);
                         int result = tts.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, String.valueOf(message.id));
-                        
+
                         if (result == TextToSpeech.ERROR) {
-                             ToastUtils.show(ChatActivity.this, "朗读失败");
+                            ToastUtils.show(ChatActivity.this, "朗读失败");
                         } else {
                             currentPlayingMessageId = message.id;
                             if (chatAdapter != null) {
@@ -598,12 +618,12 @@ public class ChatActivity extends BaseActivity {
                     }
                     break;
                 case MessageActionPopup.ACTION_REGENERATE:
-                     executor.execute(() -> {
+                    executor.execute(() -> {
                         Message userMsg = null;
                         int index = messageList.indexOf(message);
                         if (index > 0) {
-                             Message prev = messageList.get(index - 1);
-                             if ("user".equals(prev.type)) userMsg = prev;
+                            Message prev = messageList.get(index - 1);
+                            if ("user".equals(prev.type)) userMsg = prev;
                         }
                         if (userMsg != null) {
                             String apiPrompt = buildApiPrompt(userMsg);
@@ -626,13 +646,13 @@ public class ChatActivity extends BaseActivity {
             }
         }).show(anchor, message);
     }
-    
+
 
     private void initData() {
         if (sessionId != -1 && sessionId != SESSION_PENDING_NEW) {
             loadMoreMessages();
         } else {
-            // Try to load latest session
+            // 尝试加载最近一次会话
             executor.execute(() -> {
                 Session latest = sessionDao.getLatestSession();
                 if (latest != null) {
@@ -661,7 +681,7 @@ public class ChatActivity extends BaseActivity {
             } else {
                 newMessages = messageDao.getMessagesBySessionBefore(sessionId, finalLastTimestamp, LimitConfig.PAGE_SIZE);
             }
-            
+
             runOnUiThread(() -> {
                 if (newMessages == null || newMessages.isEmpty()) {
                     isLastPage = true;
@@ -671,11 +691,11 @@ public class ChatActivity extends BaseActivity {
                 } else {
                     messageList.addAll(0, newMessages);
                     chatAdapter.notifyItemRangeInserted(0, newMessages.size());
-                    
+
                     if (finalLastTimestamp == Long.MAX_VALUE) {
                         recyclerChat.scrollToPosition(messageList.size() - 1);
                     }
-                    
+
                     if (newMessages.size() < LimitConfig.PAGE_SIZE) {
                         isLastPage = true;
                     }
@@ -689,35 +709,35 @@ public class ChatActivity extends BaseActivity {
         chatController.sendChatRequest(apiPrompt, isDeepThink, aiMsg, userMsg, currentActiveModel, new com.edu.neu.finalhomework.activity.main.controller.ChatController.ChatGenerationListener() {
             @Override
             public void onThinking(String delta) {
-                 updateMessageThinking(aiMsg, delta);
+                updateMessageThinking(aiMsg, delta);
             }
 
             @Override
             public void onContent(String delta) {
-                 updateMessageContent(aiMsg, delta);
+                updateMessageContent(aiMsg, delta);
             }
 
             @Override
             public void onComplete() {
-                 handleGenerationComplete(aiMsg);
+                handleGenerationComplete(aiMsg);
             }
 
             @Override
             public void onError(String error) {
-                 handleGenerationError(aiMsg, error);
+                handleGenerationError(aiMsg, error);
             }
         });
     }
 
     private void updateMessageThinking(Message aiMsg, String delta) {
         if (aiMsg.isGenerating) {
-            aiMsg.isGenerating = false; 
+            aiMsg.isGenerating = false;
         }
-        
-        // Accumulate
+
+        // 累积思考内容
         aiMsg.deepThink = (aiMsg.deepThink == null ? "" : aiMsg.deepThink) + delta;
-        
-        // Update UI
+
+        // 刷新界面
         runOnUiThread(() -> {
             int index = messageList.indexOf(aiMsg);
             if (index != -1) {
@@ -728,15 +748,15 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void updateMessageContent(Message aiMsg, String delta) {
-        // Once we receive the first chunk, stop showing the loading dots
+        // 收到首个文本块后关闭“生成中”动画
         if (aiMsg.isGenerating) {
             aiMsg.isGenerating = false;
         }
 
-        // Accumulate
+        // 累积正文
         aiMsg.content += delta;
-        
-        // Update UI
+
+        // 刷新界面
         runOnUiThread(() -> {
             int index = messageList.indexOf(aiMsg);
             if (index != -1) {
@@ -802,14 +822,14 @@ public class ChatActivity extends BaseActivity {
             recyclerChat.clearFocus();
         });
     }
-    
+
     private long lastAutoScrollTs = 0;
     private static final long AUTO_SCROLL_INTERVAL_MS = 800;
     private boolean forceStickBottom = false;
     private boolean userDragging = false;
 
     private void scrollToBottomIfNeeded() {
-        if (!forceStickBottom) return; // 仅在强制贴底阶段滚动，避免回弹
+        if (!forceStickBottom) return; // 仅在强制贴底阶段滚动，避免回跳
         if (userDragging) return;
         long now = System.currentTimeMillis();
         if (now - lastAutoScrollTs < AUTO_SCROLL_INTERVAL_MS) return;
@@ -834,7 +854,7 @@ public class ChatActivity extends BaseActivity {
     }
 
     /**
-     * 根据模型类型重新从数据库加载最近的消息列表，并刷新UI。
+     * 根据模型类型重新从数据库加载最近的消息列表，并刷新 UI
      * 不删除历史，只是限制当前列表长度以控制上下文。
      */
     private void reloadMessagesForModel(com.edu.neu.finalhomework.domain.entity.LocalModel model) {
@@ -859,7 +879,7 @@ public class ChatActivity extends BaseActivity {
     private void refreshActiveModel(boolean reloadMessages) {
         executor.execute(() -> {
             com.edu.neu.finalhomework.domain.entity.LocalModel activeModel =
-                    App.getInstance().getDatabase().modelDao().getActiveModel(com.edu.neu.finalhomework.domain.entity.LocalModel.Status.ACTIVE);
+                App.getInstance().getDatabase().modelDao().getActiveModel(com.edu.neu.finalhomework.domain.entity.LocalModel.Status.ACTIVE);
             currentActiveModel = activeModel;
             runOnUiThread(() -> {
                 chatHeader.setModelName(activeModel != null ? activeModel.name : "Select Model");
@@ -872,7 +892,7 @@ public class ChatActivity extends BaseActivity {
     }
 
     private void initListeners() {
-        // Header Listeners
+        // 顶部栏监听
         chatHeader.setOnMenuClickListener(v -> startActivity(new Intent(this, com.edu.neu.finalhomework.activity.model.ModelManagerActivity.class)));
         chatHeader.setOnModelSelectClickListener(v -> showModelPopup(v));
         chatHeader.setOnNewSessionClickListener(v -> {
@@ -887,20 +907,20 @@ public class ChatActivity extends BaseActivity {
         chatHeader.setOnHistoryClickListener(v -> startActivity(new Intent(this, com.edu.neu.finalhomework.activity.history.HistoryActivity.class)));
         chatHeader.setOnProfileClickListener(v -> startActivity(new Intent(this, com.edu.neu.finalhomework.activity.profile.ProfileActivity.class)));
 
-        // Input Panel Listeners
+        // 输入面板监听
         chatInputPanel.setOnSendListener(new ChatInputPanel.OnSendListener() {
             @Override
             public void onSend(String text, boolean isDeepThink, List<AttachmentAdapter.Attachment> attachments, Message quotedMessage) {
                 boolean deepThinkAllowed = currentActiveModel != null && !currentActiveModel.isLocal && currentActiveModel.isDeepThink;
                 handleSend(text, deepThinkAllowed && isDeepThink, attachments, quotedMessage);
             }
-            
+
             @Override
             public void onStop() {
                 stopGeneration();
             }
         });
-        
+
         chatInputPanel.setOnActionClickListener(new ChatInputPanel.OnActionClickListener() {
             @Override
             public void onCameraClick() {
@@ -924,22 +944,21 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onDeepThinkToggle(boolean enabled) {
-                ToastUtils.show(ChatActivity.this, "深度思考: " + (enabled ? "已开启" : "已关闭"));
+                ToastUtils.show(ChatActivity.this, "深度思考 " + (enabled ? "已开启" : "已关闭"));
             }
         });
     }
 
     private String buildApiPrompt(Message userMsg) {
         StringBuilder sb = new StringBuilder(userMsg.content);
-        
-        // Append Quote if exists
+
+        // 如有引用则拼接
         if (userMsg.quotedContent != null && !userMsg.quotedContent.isEmpty()) {
-            sb.append("\n\n引用内容：“").append(userMsg.quotedContent).append("”");
+            sb.append("\n\n引用内容：").append(userMsg.quotedContent);
         }
-        
-        // Append PDF content if exists
-        // Note: This relies on re-reading the file URI. If URI is invalid, we skip content.
-        // We only persist file path (URI string), so we try to re-read.
+
+        // 如有 PDF 则拼接内容
+        // 说明：依赖重新读取文件 URI，若 URI 无效则跳过；仅持久化了 URI 字符串，会尝试重新读取。
         if (userMsg.attachments != null && !userMsg.attachments.isEmpty()) {
             for (Attachment att : userMsg.attachments) {
                 if (att.type != null && (att.type.equals("application/pdf") || att.fileName.toLowerCase().endsWith(".pdf"))) {
@@ -947,21 +966,23 @@ public class ChatActivity extends BaseActivity {
                         Uri uri = Uri.parse(att.filePath);
                         String pdfContent = PdfUtils.extractTextFromPdf(ChatActivity.this, uri);
                         if (pdfContent != null) {
-                            sb.append("\n\n文件名称：“").append(att.fileName).append("”\n文件内容：“").append(pdfContent).append("”");
+                            sb.append("\n\n文件名称：").append(att.fileName)
+                                .append("\n文件内容：").append(pdfContent);
                         } else {
-                            sb.append("\n\n文件名称：“").append(att.fileName).append("”\n(无法重新读取文件内容)");
+                            sb.append("\n\n文件名称：").append(att.fileName)
+                                .append("\n(无法重新读取文件内容)");
                         }
                     } catch (Exception e) {
-                        // Ignore errors during regeneration prompt build
+                        // 构建重试 Prompt 出错时忽略
                     }
                 }
             }
         }
         return sb.toString();
     }
-    
+
     private void handleSend(String text, boolean isDeepThink, List<AttachmentAdapter.Attachment> attachments, Message quotedMessage) {
-        // Ensure active model is present
+        // 确保有激活模型
         if (currentActiveModel == null) {
             refreshActiveModel(false);
             if (currentActiveModel == null) {
@@ -971,7 +992,7 @@ public class ChatActivity extends BaseActivity {
             }
         }
         final boolean finalDeepThink = isDeepThink;
-        // Set generating state immediately
+        // 立即置为生成中状态
         runOnUiThread(() -> {
             chatInputPanel.setGenerating(true);
             forceStickBottom = true;
@@ -979,27 +1000,27 @@ public class ChatActivity extends BaseActivity {
         });
 
         executor.execute(() -> {
-            // 1. Ensure Session
+            // 1. 确保会话存在
             if (sessionId == -1 || sessionId == SESSION_PENDING_NEW) {
                 Session session = new Session();
-                // Use Time + Snippet as title to ensure uniqueness and clarity
+                // 标题采用“时间 + 摘要”保证唯一且清晰
                 String timeStr = com.edu.neu.finalhomework.utils.TimeUtils.formatDateTime(System.currentTimeMillis());
                 String snippet = text.length() > 10 ? text.substring(0, 10) + "..." : text;
                 session.title = timeStr + " " + snippet;
-                
+
                 session.lastMessage = text;
                 session.updateTimestamp = System.currentTimeMillis();
                 sessionId = sessionDao.insertSession(session);
             }
 
-            // 2. Create User Message
+            // 2. 创建用户消息
             Message userMsg = new Message();
             userMsg.sessionId = sessionId;
             userMsg.type = "user";
-            userMsg.content = text; // Only display text in UI
+            userMsg.content = text; // UI 展示纯文本
             userMsg.timestamp = System.currentTimeMillis();
-            
-            // Handle Quote (Metadata for UI display)
+
+            // 处理引用（用于 UI 展示的元数据）
             if (quotedMessage != null) {
                 userMsg.quotedMessageId = quotedMessage.id;
                 if (quotedMessage.content != null && !quotedMessage.content.isEmpty()) {
@@ -1010,8 +1031,8 @@ public class ChatActivity extends BaseActivity {
                     userMsg.quotedContent = "(引用为空)";
                 }
             }
-            
-            // Handle Attachments (Metadata for UI display)
+
+            // 处理附件（用于 UI 展示的元数据）
             if (attachments != null && !attachments.isEmpty()) {
                 userMsg.attachments = new ArrayList<>();
                 for (AttachmentAdapter.Attachment item : attachments) {
@@ -1025,51 +1046,51 @@ public class ChatActivity extends BaseActivity {
                     userMsg.attachments.add(att);
                 }
             }
-            
+
             userMsg.id = messageDao.insertMessage(userMsg);
-            
+
             runOnUiThread(() -> {
                 messageList.add(userMsg);
                 chatAdapter.notifyItemInserted(messageList.size() - 1);
                 recyclerChat.smoothScrollToPosition(messageList.size() - 1);
             });
 
-            // 3. Create Placeholder AI Response
+            // 3. 创建 AI 占位消息
             Message aiMsg = new Message();
             aiMsg.sessionId = sessionId;
             aiMsg.type = "ai";
-            aiMsg.content = ""; // Start empty
-            aiMsg.isGenerating = true; // Set generating state
+            aiMsg.content = ""; // 初始为空
+            aiMsg.isGenerating = true; // 标记生成中
             aiMsg.timestamp = System.currentTimeMillis();
             if (finalDeepThink) {
-                aiMsg.deepThink = ""; // Placeholder for streaming thinking
+                aiMsg.deepThink = ""; // 深度思考占位
             }
             aiMsg.id = messageDao.insertMessage(aiMsg);
-            
+
             runOnUiThread(() -> {
                 messageList.add(aiMsg);
                 chatAdapter.notifyItemInserted(messageList.size() - 1);
                 recyclerChat.smoothScrollToPosition(messageList.size() - 1);
             });
 
-            // 4. Send Request via ArkClient
-            // Only send text (content) + attachments/quote prompt to API, but userMsg in UI/DB only has text.
-            // We construct the full prompt here.
-            
+            // 4. 通过 ArkClient 发送请求
+            // 仅将文本 + 附件/引用 prompt 发送给接口，UI/DB 的 userMsg 只保存文本；完整 prompt 在此拼装。
+
             StringBuilder apiPromptBuilder = new StringBuilder(text);
 
-            // Handle Quote
+            // 处理引用
             if (quotedMessage != null && quotedMessage.content != null) {
-                apiPromptBuilder.append("\n\n引用内容：“").append(quotedMessage.content).append("”");
+                apiPromptBuilder.append("\n\n引用内容：").append(quotedMessage.content);
             }
 
-            // Handle PDF Attachments Reading (reuse cached text if available)
+            // 处理 PDF 附件（若有缓存文本则复用）
             if (attachments != null && !attachments.isEmpty()) {
                 for (AttachmentAdapter.Attachment item : attachments) {
                     if (item.type != null && (item.type.equals("application/pdf") || item.name.toLowerCase().endsWith(".pdf"))) {
                         String pdfContent = item.extractedText;
                         if (pdfContent != null && !pdfContent.isEmpty()) {
-                            apiPromptBuilder.append("\n\n文件名称：“").append(item.name).append("”\n文件内容：“").append(pdfContent).append("”");
+                            apiPromptBuilder.append("\n\n文件名称：").append(item.name)
+                                .append("\n文件内容：").append(pdfContent);
                             int pdfTokens = item.tokenCount > 0 ? item.tokenCount : TokenUtils.estimateTokens(pdfContent);
                             item.tokenCount = pdfTokens;
                             if (chatInputPanel != null) {
@@ -1082,14 +1103,15 @@ public class ChatActivity extends BaseActivity {
                                 chatInputPanel.updateAttachmentMeta(item.uri, 0, null);
                             }
                             Log.w("ChatActivity", "PDF content missing, skip re-read name=" + item.name);
-                            apiPromptBuilder.append("\n\n文件名称：“").append(item.name).append("”\n(无法读取文件内容)");
+                            apiPromptBuilder.append("\n\n文件名称：").append(item.name)
+                                .append("\n(无法读取文件内容)");
                         }
                     }
                 }
             }
-            
+
             String apiPrompt = apiPromptBuilder.toString();
-            
+
             sendChatRequest(apiPrompt, finalDeepThink, aiMsg, userMsg);
         });
     }
@@ -1101,7 +1123,7 @@ public class ChatActivity extends BaseActivity {
         }
         chatInputPanel.setGenerating(false);
         setRecyclerFocusDuringGeneration(false);
-        // Reset latest generating message if exists
+        // 如存在最新生成中的消息则重置
         int last = messageList.size() - 1;
         if (last >= 0) {
             Message m = messageList.get(last);
@@ -1118,20 +1140,20 @@ public class ChatActivity extends BaseActivity {
             }
         }
     }
-    
+
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         if (handManager != null) {
             handManager.processTouchEvent(ev);
         }
-        
+
         if (ev.getAction() == MotionEvent.ACTION_DOWN) {
             View v = chatInputPanel;
             if (v != null) {
                 int[] l = {0, 0};
                 v.getLocationInWindow(l);
                 int left = l[0], top = l[1], bottom = top + v.getHeight(), right = left + v.getWidth();
-                // If touch is OUTSIDE chatInputPanel
+                // 触摸点若在输入面板之外
                 if (ev.getX() < left || ev.getX() > right || ev.getY() < top || ev.getY() > bottom) {
                     hideKeyboard();
                     if (chatInputPanel.isPanelOpen()) {
@@ -1155,51 +1177,53 @@ public class ChatActivity extends BaseActivity {
 
     private void showModelPopup(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
-        
+
         executor.execute(() -> {
             List<com.edu.neu.finalhomework.domain.entity.LocalModel> models = App.getInstance().getDatabase().modelDao().getAllModels();
             runOnUiThread(() -> {
                 for (com.edu.neu.finalhomework.domain.entity.LocalModel m : models) {
-                    // Only show READY or ACTIVE models
-                    if (m.status == com.edu.neu.finalhomework.domain.entity.LocalModel.Status.READY || 
+                    // 仅展示 READY 或 ACTIVE 状态的模型
+                    if (m.status == com.edu.neu.finalhomework.domain.entity.LocalModel.Status.READY ||
                         m.status == com.edu.neu.finalhomework.domain.entity.LocalModel.Status.ACTIVE) {
-                        popup.getMenu().add(0, (int)m.id, 0, m.name);
+                        popup.getMenu().add(0, (int) m.id, 0, m.name);
                     }
                 }
-                
+
                 if (popup.getMenu().size() == 0) {
-                     popup.getMenu().add("No Models Available");
+                    popup.getMenu().add("暂无可用模型");
                 }
 
                 chatHeader.animateArrow(true);
-                
+
                 popup.setOnMenuItemClickListener(item -> {
                     long id = item.getItemId();
-                    if (id == 0) return true; // No models item
-                    
+                    if (id == 0) return true; // “无模型”占位项
+
                     executor.execute(() -> {
-                        // Deactivate currently active models
+                        // 将当前激活模型重置为 READY
                         App.getInstance().getDatabase().modelDao().changeStatus(com.edu.neu.finalhomework.domain.entity.LocalModel.Status.ACTIVE, com.edu.neu.finalhomework.domain.entity.LocalModel.Status.READY);
-                        
-                        // Activate new model
+
+                        // 激活新模型
                         com.edu.neu.finalhomework.domain.entity.LocalModel target = App.getInstance().getDatabase().modelDao().getModelById(id);
                         if (target != null) {
                             target.status = com.edu.neu.finalhomework.domain.entity.LocalModel.Status.ACTIVE;
                             App.getInstance().getDatabase().modelDao().updateModel(target);
-                            
+
                             runOnUiThread(() -> {
+                                // 同步当前激活模型，防止 UI 已切换但发送仍用旧模型
+                                currentActiveModel = target;
                                 chatHeader.setModelName(target.name);
-                                    chatInputPanel.setDeepThinkSupported(!target.isLocal && target.isDeepThink);
-                                    reloadMessagesForModel(target);
-                                ToastUtils.show(ChatActivity.this, "已切换模型: " + target.name);
+                                chatInputPanel.setDeepThinkSupported(!target.isLocal && target.isDeepThink);
+                                reloadMessagesForModel(target);
+                                ToastUtils.show(ChatActivity.this, "已切换模型 " + target.name);
                             });
                         }
                     });
                     return true;
                 });
-                
+
                 popup.setOnDismissListener(menu -> chatHeader.animateArrow(false));
-                
+
                 popup.show();
             });
         });
@@ -1208,14 +1232,14 @@ public class ChatActivity extends BaseActivity {
     private String[] getFileInfo(Uri uri) {
         String name = "Unknown";
         String size = "Unknown";
-        
+
         Cursor cursor = getContentResolver().query(uri, null, null, null, null);
         if (cursor != null) {
             try {
                 if (cursor.moveToFirst()) {
                     int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
                     int sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE);
-                    
+
                     if (nameIndex != -1) name = cursor.getString(nameIndex);
                     if (sizeIndex != -1) {
                         long sizeBytes = cursor.getLong(sizeIndex);

@@ -15,8 +15,7 @@ import com.edu.neu.finalhomework.activity.main.ChatActivity;
  */
 public class SplashActivity extends BaseActivity {
     
-    private static final long SPLASH_DELAY = 2000; // 2秒延迟
-    
+    private static final long SPLASH_DELAY = 2000; // 2 秒延时
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

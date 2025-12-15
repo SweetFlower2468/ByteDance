@@ -40,14 +40,14 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
             if (recyclerAttachments != null) {
                 recyclerAttachments.setLayoutManager(new LinearLayoutManager(itemView.getContext(), LinearLayoutManager.HORIZONTAL, false));
             }
-            // Hide close button
+            // 隐藏关闭按钮
             View btnClose = quoteFileWrapper.findViewById(R.id.btn_close);
             if (btnClose != null) btnClose.setVisibility(View.GONE);
         }
         
         if (quoteTextWrapper != null) {
             tvQuoteContent = quoteTextWrapper.findViewById(R.id.tv_quote_content);
-            // Hide close button
+            // 隐藏关闭按钮
             View btnClose = quoteTextWrapper.findViewById(R.id.btn_close);
             if (btnClose != null) btnClose.setVisibility(View.GONE);
         }
@@ -57,7 +57,7 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
         if (message != null) {
             if (tvContent != null) tvContent.setText(message.content);
             
-            // Handle Quote
+            // 处理引用显示
             String quoteToShow = null;
             boolean hasQuote = (message.quotedMessageId != null) || (message.quotedContent != null && !message.quotedContent.isEmpty());
             if (hasQuote) {
@@ -93,7 +93,7 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
                 if (quoteTextWrapper != null) quoteTextWrapper.setVisibility(View.GONE);
             }
             
-            // Handle Attachments
+            // 处理附件
             if (message.attachments != null && !message.attachments.isEmpty()) {
                 if (quoteFileWrapper != null) {
                     quoteFileWrapper.setVisibility(View.VISIBLE);
@@ -103,7 +103,7 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
                 if (quoteFileWrapper != null) quoteFileWrapper.setVisibility(View.GONE);
             }
             
-            // Long click
+            // 长按弹出操作菜单
             if (tvContent != null) {
                 tvContent.setOnLongClickListener(v -> {
                     if (listener != null) {
@@ -126,7 +126,7 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
     private void setupAttachments(List<Attachment> attachments) {
         if (recyclerAttachments == null) return;
         
-        // Convert domain attachments to adapter attachments
+        // 将领域层附件转换为适配器对象
         List<AttachmentAdapter.Attachment> adapterItems = new ArrayList<>();
         for (Attachment att : attachments) {
             Uri uri = Uri.parse(att.filePath);
@@ -140,7 +140,7 @@ public class UserMsgHolder extends RecyclerView.ViewHolder {
                     null));
         }
         
-        // Read-only adapter
+        // 只读模式的附件列表
         AttachmentAdapter adapter = new AttachmentAdapter(adapterItems, null, true);
         recyclerAttachments.setAdapter(adapter);
     }

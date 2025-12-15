@@ -45,7 +45,7 @@ public class FeedbackSubmitActivity extends BaseActivity {
                  startActivity(intent);
                  return true;
             }
-            // Fallback
+            // 兜底处理
             String resName = getResources().getResourceEntryName(item.getItemId());
             if (resName != null && resName.contains("history")) {
                 Intent intent = new Intent(this, FeedbackHistoryActivity.class);

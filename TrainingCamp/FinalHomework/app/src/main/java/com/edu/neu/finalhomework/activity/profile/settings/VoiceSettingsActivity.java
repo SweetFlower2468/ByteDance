@@ -44,12 +44,12 @@ public class VoiceSettingsActivity extends BaseActivity {
     private MediaPlayer mediaPlayer;
     private boolean isPlaying = false;
 
-    // Config
+    // 配置缓存
     private String selectedVoiceId;
     private int pitchVal; // 0-100
     private int speedVal; // 0-100
     private List<VoiceOption> allVoices = new ArrayList<>();
-    private String currentCategory = "recommended"; // recommended, female, male
+    private String currentCategory = "recommended"; // 分类：推荐/女声/男声
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,13 +66,8 @@ public class VoiceSettingsActivity extends BaseActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
         
-        // Custom Back Button in case toolbar doesn't handle it the way user wants, 
-        // but with setSupportActionBar, navigation icon is standard. 
-        // The user asked for "bigger", standard 48dp should be fine if not using custom ImageView.
-        // If user sees custom ImageView, I should bind it.
-        // My previous edit to XML REMOVED custom ImageView and put app:navigationIcon back.
-        // So I don't need to find R.id.btn_back or R.id.btn_save_config manually.
-        // They are handled by toolbar navigation and menu.
+        // 自定义返回键说明：使用 setSupportActionBar 后采用标准导航图标（约 48dp 命中区域），
+        // XML 已恢复 app:navigationIcon，不再额外绑定自定义 ImageView，返回/保存交由 Toolbar 导航与菜单处理。
 
         recyclerVoices = findViewById(R.id.recycler_voices);
         recyclerVoices.setLayoutManager(new LinearLayoutManager(this));
@@ -108,7 +103,7 @@ public class VoiceSettingsActivity extends BaseActivity {
     }
     
     private void initData() {
-        // Load config
+        // 读取本地配置
         selectedVoiceId = SPUtils.getString("tts_voice_id", "BV700_streaming");
         pitchVal = SPUtils.getInt("tts_pitch", 50);
         speedVal = SPUtils.getInt("tts_speed", 50);
@@ -122,7 +117,7 @@ public class VoiceSettingsActivity extends BaseActivity {
         if (sliderSpeed != null) sliderSpeed.setValue(speedVal);
         updateValueTexts();
 
-        // Load Voices
+        // 加载音色列表
         allVoices.clear();
         allVoices.add(new VoiceOption("BV700_streaming", "温柔桃子", "亲切自然，适合日常对话", true, "female"));
         allVoices.add(new VoiceOption("BV406_streaming", "开朗青年", "阳光活力，充满热情", true, "male"));
@@ -191,7 +186,7 @@ public class VoiceSettingsActivity extends BaseActivity {
         if (sliderPitch != null) sliderPitch.setValue(pitchVal);
         if (sliderSpeed != null) sliderSpeed.setValue(speedVal);
         updateValueTexts();
-        ToastUtils.show(this, "已重置为默认值");
+        ToastUtils.show(this, "已重置为默认");
     }
 
     private void updateValueTexts() {
@@ -224,28 +219,28 @@ public class VoiceSettingsActivity extends BaseActivity {
             });
         }
         
-        // Mock Speaker Icon (Left)
+        // 左侧“试听”图标（占位，未实际调用 TTS）
         View ivSpeaker = findViewById(R.id.iv_speaker_mock);
         if (ivSpeaker != null) {
             ivSpeaker.setOnClickListener(v -> ToastUtils.show(this, "试听功能需调用原生TTS接口"));
         }
         
-        // Reset Button (Right - previously refresh/audit)
+        // 右侧重置按钮（原为刷新/检查入口）
         View btnReset = findViewById(R.id.btn_reset);
         if (btnReset != null) {
             btnReset.setOnClickListener(v -> resetConfig());
         }
         
-        // Tabs
+        // 顶部标签切换
         if (tabRecommended != null) tabRecommended.setOnClickListener(v -> filterVoices("recommended"));
         if (tabFemale != null) tabFemale.setOnClickListener(v -> filterVoices("female"));
         if (tabMale != null) tabMale.setOnClickListener(v -> filterVoices("male"));
     }
 
     private void playPreview(String voiceId, String text) {
-        // Disable network call for preview as requested
+        // 按需求禁用真实试听网络请求
         ToastUtils.show(this, "正在调用语音合成接口..."); 
-        // No actual API call
+        // 不发起实际接口调用
     }
 
     private void playAudio(byte[] audioData) {
@@ -291,7 +286,7 @@ public class VoiceSettingsActivity extends BaseActivity {
         stopAudio();
     }
 
-    // --- Adapter ---
+    // --- 适配器 ---
     class VoiceAdapter extends RecyclerView.Adapter<VoiceAdapter.ViewHolder> {
         private List<VoiceOption> list;
 
@@ -317,10 +312,10 @@ public class VoiceSettingsActivity extends BaseActivity {
                 selectedVoiceId = item.id;
                 SPUtils.putString("tts_voice_id", selectedVoiceId);
                 notifyDataSetChanged();
-                updateCurrentVoiceText(allVoices); // Use allVoices to find name even if filtered
+                updateCurrentVoiceText(allVoices); // 即便过滤列表，也用完整列表定位名称
             });
 
-            holder.ivPlay.setOnClickListener(v -> playPreview(item.id, "你好，我是" + item.name));
+            holder.ivPlay.setOnClickListener(v -> playPreview(item.id, "你好，我是 " + item.name));
         }
 
         @Override
@@ -343,13 +338,13 @@ public class VoiceSettingsActivity extends BaseActivity {
         }
     }
 
-    // --- Model ---
+    // --- 数据模型 ---
     static class VoiceOption {
         String id;
         String name;
         String desc;
         boolean isRecommended;
-        String gender; // "male" or "female"
+        String gender; // "male" 或 "female" 表示性别
 
         public VoiceOption(String id, String name, String desc, boolean isRecommended, String gender) {
             this.id = id;

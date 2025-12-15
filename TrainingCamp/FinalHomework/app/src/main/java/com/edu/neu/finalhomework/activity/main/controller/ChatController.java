@@ -23,9 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Chat Generation Controller (Middle Layer)
- * Encapsulates logic for dispatching requests to Local LlamaService or Network ArkClient.
- * Handles prompt construction, context retrieval, and response parsing.
+ * 聊天生成控制器（中间层）
+ * 负责分发到本地 LlamaService 或网络 ArkClient，封装 Prompt 构建、上下文获取与响应解析。
  */
 public class ChatController {
 
@@ -37,7 +36,7 @@ public class ChatController {
     private Cancellable activeNetworkCancellable;
     private boolean isGenerating = false;
 
-    // Listener for UI updates
+    // UI 更新回调
     public interface ChatGenerationListener {
         void onThinking(String delta);
         void onContent(String delta);
@@ -51,16 +50,14 @@ public class ChatController {
         this.mainHandler = new Handler(Looper.getMainLooper());
     }
 
-    /**
-     * Stop any ongoing generation
-     */
+    /** 停止当前生成 */
     public void stopGeneration() {
         if (!isGenerating) return;
 
-        // Stop Local
+        // 停止本地推理
         LlamaService.getInstance().cancelInference();
 
-        // Stop Network
+        // 停止网络请求
         if (activeNetworkCancellable != null) {
             activeNetworkCancellable.cancel();
             activeNetworkCancellable = null;
@@ -70,13 +67,13 @@ public class ChatController {
     }
 
     /**
-     * Send a chat request
-     * @param apiPrompt The prepared prompt (text + attachments description)
-     * @param isDeepThink Whether deep thinking is enabled
-     * @param aiMsg The placeholder AI message to update
-     * @param userMsg The user message (for context filtering)
-     * @param activeModel The model to use
-     * @param listener Callback for UI updates
+     * 发送聊天请求
+     * @param apiPrompt 组装好的 Prompt（文本 + 附件描述）
+     * @param isDeepThink 是否开启深度思考
+     * @param aiMsg AI 占位消息
+     * @param userMsg 用户消息（用于上下文过滤）
+     * @param activeModel 当前模型
+     * @param listener UI 回调
      */
     public void sendChatRequest(String apiPrompt, boolean isDeepThink, Message aiMsg, Message userMsg, LocalModel activeModel, ChatGenerationListener listener) {
         if (activeModel == null) {
@@ -96,7 +93,7 @@ public class ChatController {
     private void handleLocalRequest(String prompt, Message aiMsg, Message userMsg, LocalModel model, ChatGenerationListener listener) {
         LlamaService service = LlamaService.getInstance();
 
-        // Build shorter context specifically for local models
+        // 为本地模型裁剪上下文
         List<Message> contextHistory = new ArrayList<>();
         List<Message> dbMessages = messageDao.getLatestMessagesBySession(aiMsg.sessionId, ChatConfig.MAX_LOCAL_CONTEXT_MESSAGES + 2);
         if (dbMessages != null) {
@@ -108,18 +105,18 @@ public class ChatController {
                     contextHistory.add(m);
                 }
             }
-            // Keep only the last N messages for local context
+            // 仅保留最近 N 条消息
             if (contextHistory.size() > ChatConfig.MAX_LOCAL_CONTEXT_MESSAGES) {
                 contextHistory = contextHistory.subList(contextHistory.size() - ChatConfig.MAX_LOCAL_CONTEXT_MESSAGES, contextHistory.size());
             }
         }
 
-        // Build ChatML prompt with context + latest user query
+        // 基于上下文与最新提问构建 ChatML Prompt
         String chatPrompt = buildLocalChatPrompt(contextHistory, prompt, ChatConfig.MAX_LOCAL_PROMPT_CHARS);
 
-        // Ensure model is loaded
+        // 确保模型已加载
         if (!service.isModelLoaded() || (service.getCurrentModel() != null && service.getCurrentModel().id != model.id)) {
-            // Notify loading? (Maybe listener.onStatus("Loading..."))
+            // 可选：通知“加载中”
             service.loadModel(model, new SimpleCallback() {
                 @Override
                 public void onSuccess() {
@@ -129,7 +126,7 @@ public class ChatController {
                 @Override
                 public void onFailure(String error) {
                     isGenerating = false;
-                    listener.onError("Model load failed: " + error);
+                    listener.onError("模型加载失败: " + error);
                 }
             });
         } else {
@@ -138,9 +135,7 @@ public class ChatController {
     }
 
     private void doLocalInference(LlamaService service, String chatPrompt, Message aiMsg, ChatGenerationListener listener) {
-        // If Deep Thinking is requested, we might want to prompt for it,
-        // but typically R1 models output <think> automatically.
-        // If the user wants to DISABLE it, we might need a negative prompt, but for now we rely on parsing.
+        // 深度思考：部分模型会自动输出 <think>，若需强制关闭可考虑负向提示；当前依赖解析处理
 
         service.infer(chatPrompt, new StreamCallback() {
             private boolean hasReceivedContent = false;
@@ -164,7 +159,7 @@ public class ChatController {
                 buffer.append(delta);
                 String currentBuffer = buffer.toString();
 
-                // Stop Token Filtering
+                // 停止词过滤
                 if (containsStopToken(currentBuffer)) {
                     int stopIndex = getStopTokenIndex(currentBuffer);
                     if (stopIndex != -1) {
@@ -172,19 +167,17 @@ public class ChatController {
                         String validContent = currentBuffer.substring(0, stopIndex);
                         processContent(validContent, listener, true);
                         
-                        // We do NOT call onComplete here directly if the service guarantees calling onComplete after cancel.
-                        // However, LlamaService implementation calls onComplete in finally block.
-                        // So we just return.
+                        // 若服务端保证 cancel 后触发 onComplete，则此处不重复调用；LlamaService 会在 finally 中回调
                         return; 
                     }
                 }
 
-                // Process <think> tags
+                // 解析 <think> 标签
                 String processed = processBufferForThinking(currentBuffer, listener);
                 buffer.setLength(0);
                 buffer.append(processed);
 
-                // If we already hit the output cap, stop early
+                // 达到输出上限则提前停止
                 if (outputLimitReached) {
                     service.cancelInference();
                     return;
@@ -193,7 +186,7 @@ public class ChatController {
 
             @Override
             public void onComplete() {
-                // Flush remaining buffer
+                // 刷新剩余缓存
                 if (buffer.length() > 0) {
                      processContent(buffer.toString(), listener, true);
                 }
@@ -207,7 +200,7 @@ public class ChatController {
                 listener.onError(message);
             }
 
-            // --- Helper Methods for Thinking Parsing (Ported from ChatActivity) ---
+            // --- 深度思考解析辅助方法（来自 ChatActivity） ---
 
             private boolean containsStopToken(String s) {
                  return s.contains("<|im_end|>") || s.contains("<|im_start|>") || s.contains("<|endoftext|>");
@@ -327,14 +320,13 @@ public class ChatController {
                 }
             }
 
-            // Remove ChatML control markers if they appear in generation. 
-            // If marker is found, return null to indicate we should stop.
+            // 若生成中出现 ChatML 控制标记则移除；若标记出现在开头则返回 null 表示需要停止
             private String stripStopMarkers(String text) {
                 if (text == null || text.isEmpty()) return text;
                 int idx = text.indexOf("<|im_start|>");
                 if (idx == -1) idx = text.indexOf("<|im_end|>");
                 if (idx == -1) idx = text.indexOf("<|endoftext|>");
-                // Also guard against malformed variants like "<im_start"
+                // 兼容形如 "<im_start" 的异常片段
                 if (idx == -1) {
                     int loose = text.toLowerCase().indexOf("im_start");
                     if (loose != -1) idx = loose;
@@ -345,7 +337,7 @@ public class ChatController {
                 }
                 if (idx == -1) return text;
                 if (idx == 0) {
-                    return null; // Entire chunk is marker or starts with it -> stop
+                    return null; // 整个分片即为标记或以标记开头，直接停止
                 }
                 return text.substring(0, idx);
             }
@@ -355,14 +347,13 @@ public class ChatController {
     private String buildLocalChatPrompt(List<Message> history, String currentPrompt, int maxChars) {
         StringBuilder sb = new StringBuilder();
         // 不再注入预设角色，直接从对话历史开始
-
         if (history != null) {
             for (Message m : history) {
                 if (m == null || m.content == null) continue;
                 String role = "user".equals(m.type) ? "user" : "assistant";
                 String block = "<|im_start|>" + role + "\n" + m.content + "<|im_end|>\n";
                 if (sb.length() + block.length() > maxChars) {
-                    // Skip older messages if exceeding limit
+                    // 超出上限时跳过更早的消息
                     continue;
                 }
                 sb.append(block);
@@ -375,7 +366,7 @@ public class ChatController {
         int remaining = maxChars - sb.length() - overhead;
         String safePrompt = currentPrompt == null ? "" : currentPrompt;
         if (remaining < safePrompt.length()) {
-            // Keep the tail of the prompt to preserve the most recent intent
+            // 截取 Prompt 末尾，保留最近意图
             safePrompt = safePrompt.substring(safePrompt.length() - Math.max(0, remaining));
         }
 
@@ -390,10 +381,7 @@ public class ChatController {
         long currentSessionId = aiMsg.sessionId;
         List<ArkClient.Msg> contextMessages = new ArrayList<>();
 
-        // Fetch Context
-        // Note: Running DB query on main thread if called from main? 
-        // ChatController should handle threading or assume caller handles it.
-        // For safety, we use executor to fetch DB, then call ArkClient.
+        // 拉取上下文（使用线程池查询 DB，避免主线程阻塞）
         
         executor.execute(() -> {
             int fetchLimit = ChatConfig.MAX_CONTEXT_MESSAGES + 5;
@@ -420,7 +408,7 @@ public class ChatController {
             
             contextMessages.add(new ArkClient.Msg("user", apiPrompt));
 
-            // Network call must be async
+            // 网络调用需异步进行
             activeNetworkCancellable = new ArkClient().sendChat(contextMessages, isDeepThink, new ArkClient.StreamListener() {
                 @Override
                 public void onReasoning(String delta) {

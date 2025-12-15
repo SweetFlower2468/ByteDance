@@ -122,7 +122,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:hint="模型路径 或 下载链接 (URL)">
+                            android:hint="模型路径或下载链接 (URL)">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/et_local_path"

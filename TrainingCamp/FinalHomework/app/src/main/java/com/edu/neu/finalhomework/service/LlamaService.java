@@ -20,12 +20,12 @@ public class LlamaService {
     
     private static final String TAG = "LlamaService";
     private static LlamaService instance;
-    private long contextPointer = 0; // Pointer to native llama_context
+    private long contextPointer = 0; // 指向本地 llama_context 的指针
     private LocalModel currentModel;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     private Handler mainHandler = new Handler(Looper.getMainLooper());
     
-    // Load native library
+    // 加载本地库
     static {
         try {
             System.loadLibrary("llama-android");
@@ -62,7 +62,7 @@ public class LlamaService {
             return;
         }
         
-        // Unload previous if exists
+        // 如果存在则卸载之前的模型
         unloadModel();
         
         executor.execute(() -> {
@@ -75,8 +75,8 @@ public class LlamaService {
                     return;
                 }
                 
-                // Native Load
-                // Use Config values
+                // 本地加载
+                // 使用配置值
                 int nContext = com.edu.neu.finalhomework.config.ModelConfig.nContext;
                 int nThreads = com.edu.neu.finalhomework.config.ModelConfig.nThreads;
                 int nBatch = com.edu.neu.finalhomework.config.ModelConfig.nBatch;
@@ -110,19 +110,19 @@ public class LlamaService {
      * 卸载当前模型
      */
     public void unloadModel() {
-        // 1. Cancel any running inference immediately
+        // 1. 立即取消任何正在运行的推理
         cancelInference();
         
-        // 2. Capture the pointer to free
+        // 2. 捕获要释放的指针
         final long ptrToFree = contextPointer;
         
-        // 3. Reset state immediately so new calls fail gracefully or wait
+        // 3. 立即重置状态，使新调用优雅地失败或等待
         contextPointer = 0;
         currentModel = null;
         
         if (ptrToFree != 0) {
-            // 4. Perform the native free on the executor thread
-            // This ensures it runs AFTER any currently running inference task finishes
+            // 4. 在执行器线程上执行本地释放
+            // 这确保它在当前正在运行的推理任务完成后运行
             executor.execute(() -> {
                 try {
                     freeModelNative(ptrToFree);
@@ -144,9 +144,9 @@ public class LlamaService {
         
         executor.execute(() -> {
             try {
-                // Blocking native call that triggers callbacks
-                // Since native callbacks from C thread to Java UI thread are tricky,
-                // we assume native method accepts a jobject callback and calls its methods.
+                // 阻塞的本地调用，触发回调
+                // 由于从C线程到Java UI线程的本地回调比较棘手，
+                // 我们假设本地方法接受一个jobject回调并调用其方法。
                 currentCallbackAdapter = new NativeCallbackAdapter(callback, mainHandler);
                 completionNative(contextPointer, prompt, currentCallbackAdapter);
                 
@@ -175,21 +175,21 @@ public class LlamaService {
         return currentModel;
     }
     
-    // --- JNI Interfaces ---
-    // These methods should be implemented in C++ (llama-android)
+    // --- JNI 接口 ---
+    // 这些方法应在 C++ (llama-android) 中实现
     
-    // Updated signature to accept config parameters
+    // 更新签名以接受配置参数
     private native long loadModelNative(String modelPath, int nContext, int nThreads, int nBatch, int nGpuLayers);
     private native void freeModelNative(long contextPtr);
     private native void completionNative(long contextPtr, String prompt, NativeCallbackAdapter callback);
     
-    // Callback Adapter to be called from JNI
+    // 从 JNI 调用的回调适配器
     public static class NativeCallbackAdapter {
         private StreamCallback callback;
         private Handler handler;
         private volatile boolean stopRequested = false;
         
-        // Buffer for handling split UTF-8 characters
+        // 处理分割的UTF-8字符的缓冲区
         private java.io.ByteArrayOutputStream byteBuffer = new java.io.ByteArrayOutputStream();
         
         public NativeCallbackAdapter(StreamCallback callback, Handler handler) {
@@ -201,13 +201,13 @@ public class LlamaService {
             stopRequested = true;
         }
         
-        // Called from Native C++ to check if we should stop
+        // 从本地 C++ 调用，检查是否应该停止
         public boolean shouldStop() {
             return stopRequested;
         }
         
-        // Called from Native C++
-        // Changed to receive raw bytes to avoid JNI UTF-8 validation crashes on partial multi-byte characters
+        // 从本地 C++ 调用
+        // 更改为接收原始字节以避免在部分多字节字符上的 JNI UTF-8 验证崩溃
         public void onToken(byte[] tokenBytes) {
             if (handler != null && callback != null && !stopRequested) {
                 synchronized (byteBuffer) {

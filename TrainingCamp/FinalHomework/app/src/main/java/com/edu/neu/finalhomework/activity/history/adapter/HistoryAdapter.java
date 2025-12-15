@@ -53,7 +53,7 @@ public class HistoryAdapter extends ListAdapter<Session, HistoryAdapter.ViewHold
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivAvatar = itemView.findViewById(R.id.iv_session_avatar);
-            ivAvatar.setImageResource(R.drawable.ic_quote); // Set fixed icon
+            ivAvatar.setImageResource(R.drawable.ic_quote); // 固定使用引用图标
             tvTitle = itemView.findViewById(R.id.tv_session_title);
             tvLastMessage = itemView.findViewById(R.id.tv_last_message);
             tvTime = itemView.findViewById(R.id.tv_time);
@@ -64,10 +64,10 @@ public class HistoryAdapter extends ListAdapter<Session, HistoryAdapter.ViewHold
             tvTitle.setText(session.title != null ? session.title : "新会话");
             tvLastMessage.setText(session.lastMessage != null ? session.lastMessage : "暂无消息");
             
-            // Time format logic
+            // 时间格式化
             tvTime.setText(TimeUtils.getFriendlyTimeSpanByNow(session.updateTimestamp));
             
-            // Token display
+            // Token 显示
             String tokenText = formatTokenCount(session.totalTokens);
             tvTokens.setText(tokenText);
             tvTokens.setVisibility(session.totalTokens > 0 ? View.VISIBLE : View.GONE);

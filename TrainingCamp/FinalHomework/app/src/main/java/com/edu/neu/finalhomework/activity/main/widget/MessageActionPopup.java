@@ -29,7 +29,7 @@ public class MessageActionPopup extends PopupWindow {
 
     public static final int ACTION_COPY = 1;
     public static final int ACTION_QUOTE = 2;
-    // public static final int ACTION_SELECT_TEXT = 3; // Removed
+    // public static final int ACTION_SELECT_TEXT = 3; // 已移除
     public static final int ACTION_LIKE = 4;
     public static final int ACTION_DISLIKE = 5;
     public static final int ACTION_DELETE = 6;
@@ -49,11 +49,11 @@ public class MessageActionPopup extends PopupWindow {
     }
     
     private void init(Context context) {
-        // Inflate with a parent to preserve layout parameters (width)
+        // 通过带父容器的 inflate 保留布局宽度参数
         View contentView = LayoutInflater.from(context).inflate(R.layout.popup_msg_actions, new android.widget.FrameLayout(context), false);
         setContentView(contentView);
         
-        // Settings
+        // 基础属性设置
         ViewGroup.LayoutParams layoutParams = contentView.getLayoutParams();
         if (layoutParams != null && layoutParams.width > 0) {
             setWidth(layoutParams.width);
@@ -81,16 +81,16 @@ public class MessageActionPopup extends PopupWindow {
     public void show(View anchor, Message message) {
         List<PopupActionAdapter.ActionItem> items = new ArrayList<>();
         
-        // Common Actions
+        // 通用操作
         items.add(new PopupActionAdapter.ActionItem(ACTION_COPY, R.drawable.ic_copy, "复制"));
         items.add(new PopupActionAdapter.ActionItem(ACTION_QUOTE, R.drawable.ic_quote, "引用"));
-        // items.add(new PopupActionAdapter.ActionItem(ACTION_SELECT_TEXT, R.drawable.ic_search, "选择文本")); // Removed
+        // items.add(new PopupActionAdapter.ActionItem(ACTION_SELECT_TEXT, R.drawable.ic_search, "选择文本")); // 已移除
         
         if ("ai".equals(message.type)) {
-            items.add(new PopupActionAdapter.ActionItem(ACTION_TTS, R.drawable.ic_volume_up, "朗读"));
+            items.add(new PopupActionAdapter.ActionItem(ACTION_TTS, R.drawable.ic_volume_high, "朗读"));
             items.add(new PopupActionAdapter.ActionItem(ACTION_REGENERATE, R.drawable.ic_refresh, "重新生成"));
             
-            // Dynamic Icons
+            // 动态图标与文案
             PopupActionAdapter.ActionItem favItem = new PopupActionAdapter.ActionItem(
                 ACTION_FAVORITE, 
                 message.isFavorite ? R.drawable.ic_star_filled : R.drawable.ic_star, 
@@ -99,19 +99,19 @@ public class MessageActionPopup extends PopupWindow {
             if (message.isFavorite) favItem.colorRes = R.color.brand_primary;
             items.add(favItem);
             
-            PopupActionAdapter.ActionItem likeItem = new PopupActionAdapter.ActionItem(ACTION_LIKE, R.drawable.ic_like_up_black, message.isLiked ? "取消点赞" : "点赞");
+            PopupActionAdapter.ActionItem likeItem = new PopupActionAdapter.ActionItem(ACTION_LIKE, R.drawable.ic_thumb_up, message.isLiked ? "取消点赞" : "点赞");
             if (message.isLiked) likeItem.colorRes = R.color.brand_primary;
             items.add(likeItem);
 
-            PopupActionAdapter.ActionItem dislikeItem = new PopupActionAdapter.ActionItem(ACTION_DISLIKE, R.drawable.ic_unlike_black, message.isDisliked ? "取消点踩" : "不喜欢");
+            PopupActionAdapter.ActionItem dislikeItem = new PopupActionAdapter.ActionItem(ACTION_DISLIKE, R.drawable.ic_thumb_down, message.isDisliked ? "取消点踩" : "不喜欢");
             if (message.isDisliked) dislikeItem.colorRes = R.color.error;
             items.add(dislikeItem);
             
             PopupActionAdapter.ActionItem deleteItem = new PopupActionAdapter.ActionItem(ACTION_DELETE, R.drawable.ic_trash_red, "删除");
-            deleteItem.colorRes = R.color.error; // Use red color
+            deleteItem.colorRes = R.color.error; // 删除使用红色强调
             items.add(deleteItem);
         } else {
-             // User message actions
+             // 用户消息的操作
              PopupActionAdapter.ActionItem deleteItem = new PopupActionAdapter.ActionItem(ACTION_DELETE, R.drawable.ic_trash_red, "删除");
              deleteItem.colorRes = R.color.error; 
              items.add(deleteItem);
@@ -125,9 +125,8 @@ public class MessageActionPopup extends PopupWindow {
         });
         recyclerView.setAdapter(adapter);
 
-        // Calculate offset to show near touch point or anchor center?
-        // Standard dropdown
-        showAsDropDown(anchor, 0, -anchor.getHeight() / 2); // Roughly center vertically relative to anchor top?
-        // Better: showAsDropDown(anchor, x, y)
+        // 计算偏移：此处让菜单在锚点上方大致居中
+        showAsDropDown(anchor, 0, -anchor.getHeight() / 2); // 粗略垂直居中
+        // 如需更精确可调用 showAsDropDown(anchor, x, y)
     }
 }

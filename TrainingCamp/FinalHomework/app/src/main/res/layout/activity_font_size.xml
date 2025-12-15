@@ -14,7 +14,7 @@
         android:background="@color/surface_card"
         app:layout_constraintTop_toTopOf="parent"
         app:menu="@menu/menu_font"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        app:navigationIcon="@drawable/ic_arrow_left"
         app:title="字号调整"
         app:titleCentered="true" />
 
@@ -82,8 +82,8 @@
 
                 <!--
                     Slider 样式深度定制：
-                    1. trackColorActive/Inactive 都设为 surface_deep_think (浅灰)，消除进度感。
-                    2. thumbColor 设为白色，加阴影和描边。
+                    1. trackColorActive/Inactive 都设为 surface_deep_think (浅灰)，消除进度感；
+                    2. thumbColor 设为白色，加阴影和描边；
                     3. labelBehavior="floating" 显示上方气泡。
                 -->
                 <com.google.android.material.slider.Slider

@@ -19,32 +19,32 @@ public class ToastUtils {
     public static void show(Context context, String message) {
         if (context == null) return;
 
-        // Cancel previous toast if it exists
+        // 如果存在，则取消之前的toast
         if (currentToast != null) {
             currentToast.cancel();
         }
 
-        // Inflate custom layout
+        // 展开自定义布局
         View layout = LayoutInflater.from(context).inflate(R.layout.layout_custom_toast, null);
 
-        // Set text
+        // 设置文本
         TextView textView = layout.findViewById(R.id.toast_text);
         textView.setText(message);
 
-        // Set icon via Glide
+        // 通过Glide设置图标
         ImageView imageView = layout.findViewById(R.id.toast_icon);
         Glide.with(context.getApplicationContext())
                 .load(ICON_URL)
                 .circleCrop()
-                .placeholder(R.drawable.ic_logo_doubao) // Fallback to new app logo
-                .error(R.drawable.ic_logo_doubao) // Fallback if load fails
+                .placeholder(R.drawable.ic_logo_doubao) // 回退到新的应用程序图标
+                .error(R.drawable.ic_logo_doubao) // 加载失败时回退
                 .into(imageView);
 
-        // Create and show toast
+        // 创建并显示toast
         currentToast = new Toast(context.getApplicationContext());
         currentToast.setDuration(Toast.LENGTH_SHORT);
         currentToast.setView(layout);
-        // Set gravity AFTER setView to ensure it's treated as a custom toast
+        // 在setView之后设置重心，确保它被当作自定义toast处理
         currentToast.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL, 0, 100); 
         currentToast.show();
     }

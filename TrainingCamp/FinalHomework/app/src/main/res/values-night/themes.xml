@@ -1,7 +1,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme (Night mode). -->
     <style name="Theme.FinalHomework" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- 主色调 -->
+        <!-- 主色�?-->
         <item name="colorPrimary">@color/brand_primary</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/brand_primary_dark</item>

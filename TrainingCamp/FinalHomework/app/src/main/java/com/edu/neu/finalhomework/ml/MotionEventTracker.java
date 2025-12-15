@@ -43,12 +43,12 @@ public class MotionEventTracker {
             case MotionEvent.ACTION_UP:
                 if (currentEvents != null) {
                     addPoint(ev);
-                    if (currentEvents.length() >= 6) { // Filter short taps
+                    if (currentEvents.length() >= 6) { // 过滤短按
                         if (listener != null) {
                             listener.onTrackDataReady(currentEvents);
                         }
                     } else {
-                        // Handle Tap
+                        // 处理点击
                         if (listener != null) {
                             listener.onTap(ev.getX(), ev.getY());
                         }
@@ -66,12 +66,12 @@ public class MotionEventTracker {
         if (currentEvents == null) return;
         try {
             JSONArray point = new JSONArray();
-            point.put(ev.getX());          // Feature 1: X
-            point.put(ev.getY());          // Feature 2: Y
-            point.put(width);              // Feature 3: Width
-            point.put(height);             // Feature 4: Height
-            point.put(density);            // Feature 5: Density
-            point.put(ev.getEventTime() - currentDownTime); // Feature 6: Relative Time
+            point.put(ev.getX());          // 特征1：X
+            point.put(ev.getY());          // 特征2：Y
+            point.put(width);              // 特征3：屏幕宽
+            point.put(height);             // 特征4：屏幕高
+            point.put(density);            // 特征5：屏幕密度
+            point.put(ev.getEventTime() - currentDownTime); // 特征6：相对时间
             currentEvents.put(point);
         } catch (JSONException e) {
             e.printStackTrace();

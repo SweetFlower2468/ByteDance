@@ -25,7 +25,7 @@ public class OperatingHandClassifier {
 
     private static final int SAMPLE_COUNT = 9;
     private static final int TENSOR_SIZE = 6;
-    private static final int MODEL_INPUT_SIZE = SAMPLE_COUNT * TENSOR_SIZE * 4; // 4 bytes per float
+    private static final int MODEL_INPUT_SIZE = SAMPLE_COUNT * TENSOR_SIZE * 4; // 每个 float 4 字节
 
     // Labels
     public static final int CLASS_LEFT = 0;
@@ -53,7 +53,7 @@ public class OperatingHandClassifier {
         Interpreter.Options options = new Interpreter.Options();
         tflite = new Interpreter(modelBuffer, options);
         
-        // Inspect shapes
+        // 读取输入/输出形状
         if (tflite.getInputTensorCount() > 0) {
             Tensor inputTensor = tflite.getInputTensor(0);
             inputShape = inputTensor.shape();
@@ -74,12 +74,12 @@ public class OperatingHandClassifier {
         
         ByteBuffer inputBuffer = convertFloatArrayToByteBuffer(pointList);
 
-        // Prepare Output Buffer dynamically
+        // 动态准备输出缓冲
         float[][] output;
         if (outputShape != null && outputShape.length == 2) {
             output = new float[outputShape[0]][outputShape[1]];
         } else {
-            output = new float[1][2]; // Default to [1, 2] for binary class
+            output = new float[1][2]; // 二分类默认 [1,2]
         }
 
         try {
@@ -90,26 +90,15 @@ public class OperatingHandClassifier {
             return -1;
         }
 
-        // Logic based on provided Kotlin code:
-        // output > 0.5 -> Right (1)
-        // output <= 0.5 -> Left (0)
-        // Wait, the Kotlin code says:
-        // return if (output > 0.5f) { "right" } else { "left" }
-        // The output shape in Kotlin example seems to be [1][1] or [1][2] but accessing result[0][0].
-        // If it's a single sigmoidal output:
-        
+        // 判别逻辑：
+        // 单输出 sigmoid：>0.5 判为右手，否则左手
+        // 双输出 softmax：取最大概率索引
         float score = output[0][0];
         if (output[0].length == 1) {
-            // Binary classification with single output neuron (sigmoid)
+            // 单输出（sigmoid）二分类
             return score > 0.5f ? CLASS_RIGHT : CLASS_LEFT;
         } else {
-            // Softmax with 2 neurons
-            // output[0][0] = Left prob? Or Right?
-            // Usually [Left, Right].
-            // But let's stick to the Kotlin reference logic which seemed to use single value or specific index.
-            // Reference: val output = result[0][0]; if (output > 0.5f) ...
-            
-            // If we have 2 outputs, let's find max.
+            // 双输出（softmax）→ 取最大概率
             int maxIndex = -1;
             float maxProb = -1;
              for (int i = 0; i < output[0].length; i++) {
@@ -118,9 +107,6 @@ public class OperatingHandClassifier {
                     maxIndex = i;
                 }
             }
-            // Assuming index 0 is Left, 1 is Right.
-            // Need to verify model training labels.
-            // Based on "output > 0.5 is right" in single neuron, typically 1=Right.
             return maxIndex; 
         }
     }
@@ -129,7 +115,7 @@ public class OperatingHandClassifier {
         ByteBuffer byteBuffer = ByteBuffer.allocateDirect(MODEL_INPUT_SIZE);
         byteBuffer.order(ByteOrder.nativeOrder());
 
-        // Resampling logic: Linear interpolation / Step sampling
+        // 重新采样：按步长选点（近似插值）
         float step = (float) pointList.length() / SAMPLE_COUNT;
 
         try {

@@ -26,7 +26,7 @@ public class Message {
     // 消息内容
     public String content;
     
-    // 深度思考内容（AI消息特有）
+    // 深度思考内容（AI 消息特有）
     public String deepThink;
     
     // 附件列表（图片、文件）
@@ -59,7 +59,7 @@ public class Message {
     // 是否正在生成 (用于显示 Loading 动画)
     public boolean isGenerating;
     
-    // UI State: 是否展开深度思考
+    // UI 状态：是否展开深度思考
     public boolean isDeepThinkExpanded = true;
     
     public Message() {

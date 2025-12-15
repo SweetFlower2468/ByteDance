@@ -13,11 +13,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_background"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        app:navigationIcon="@drawable/ic_arrow_left"
         app:title="提交反馈"
         app:titleCentered="true"
         app:menu="@menu/menu_help_feedback" />
-    <!-- 右上角引用你之前的历史记录菜单 -->
+    <!-- 右上角引用历史记录菜单 -->
 
     <ScrollView
         android:layout_width="match_parent"

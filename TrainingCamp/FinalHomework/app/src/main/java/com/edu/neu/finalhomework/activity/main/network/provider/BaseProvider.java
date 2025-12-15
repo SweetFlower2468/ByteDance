@@ -60,8 +60,15 @@ public abstract class BaseProvider implements LLMProvider {
         logLongString("BaseProvider_Body", jsonBody);
 
         String safeKey = model.apiKey;
-        if (safeKey != null && safeKey.startsWith("Bearer ")) {
-            safeKey = safeKey.substring(7).trim();
+        if (safeKey != null) {
+            safeKey = safeKey.trim();
+            if (safeKey.startsWith("Bearer ")) {
+                safeKey = safeKey.substring(7).trim();
+            }
+        }
+        // 调试打印明文 key（仅供本地调试，注意不要上传日志）
+        if (safeKey != null) {
+            android.util.Log.d("BaseProvider", "Auth Key (plain): " + safeKey);
         }
 
         Request request = new Request.Builder()

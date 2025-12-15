@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_card"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        app:navigationIcon="@drawable/ic_arrow_left"
         app:title="智能体声音"
         app:titleCentered="true"
         app:menu="@menu/menu_voice_settings" />
@@ -103,7 +103,7 @@
                             android:id="@+id/iv_speaker_mock"
                             android:layout_width="32dp"
                             android:layout_height="32dp"
-                            android:src="@drawable/ic_volume_up"
+                            android:src="@drawable/ic_volume_high"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             app:tint="@color/brand_primary"
                             android:padding="4dp"/>
@@ -114,7 +114,7 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:layout_marginStart="8dp"
-                            android:text="温柔桃子 (升级版)"
+                        android:text="温柔桃子（升级版）"
                             android:textStyle="bold"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp" />

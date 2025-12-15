@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 底部阴影分割线 (滚动时显示) -->
+    <!-- 底部阴影分割线（滚动时显示） -->
     <View
         android:id="@+id/divider"
         android:layout_width="match_parent"

@@ -27,7 +27,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     
     /**
      * 应用字体大小缩放
-     * 注意：updateConfiguration 在 API 17+ 已废弃，但为了兼容性仍使用
+     * 注意：updateConfiguration 在 API 17+ 已废弃，这里为兼容性保留
      * 更好的方式是使用 Activity 的 recreate() 或通过系统设置
      */
     @SuppressWarnings("deprecation")
@@ -47,13 +47,12 @@ public abstract class BaseActivity extends AppCompatActivity {
      * 设置沉浸式状态栏
      */
     private void setupImmersiveStatusBar() {
-        // 1. 设置状态栏图标颜色（亮色/深色）
+        // 1. 设置状态栏图标颜色（亮/暗）
         View decorView = getWindow().getDecorView();
         WindowInsetsControllerCompat controller = new WindowInsetsControllerCompat(
                 getWindow(), decorView
         );
         controller.setAppearanceLightStatusBars(true); // 状态栏图标变黑（假设背景是浅色）
-
         // 2. 边缘到边缘 (Edge-to-Edge) 设置
         // 这会让内容延伸到状态栏和导航栏后面，实现沉浸式
         androidx.core.view.WindowCompat.setDecorFitsSystemWindows(getWindow(), false);

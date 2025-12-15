@@ -1,8 +1,7 @@
 package com.edu.neu.finalhomework.config;
 
 /**
- * 全局开关配置
- * Debug 模式、LogTag 等
+ * 全局开关配置：Debug 模式、LogTag 等
  */
 public class AppConfig {
     

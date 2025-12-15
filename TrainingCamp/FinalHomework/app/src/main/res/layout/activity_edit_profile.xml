@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_card"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        app:navigationIcon="@drawable/ic_arrow_left"
         app:title="编辑资料"
         app:titleCentered="true">
 

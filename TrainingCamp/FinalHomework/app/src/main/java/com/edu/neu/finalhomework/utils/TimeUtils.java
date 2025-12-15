@@ -28,15 +28,15 @@ public class TimeUtils {
     }
     
     /**
-     * 格式化时间戳为日期时间
-     */
+    * 格式化时间戳为日期时间
+    */
     public static String formatDateTime(long timestamp) {
         return DATETIME_FORMAT.format(new Date(timestamp));
     }
     
     /**
      * 格式化相对时间（友好显示）
-     * 刚刚, 10分钟前, 10:30, 昨天, yyyy-MM-dd
+     * 刚刚, 10分钟, 10:30, 昨天, yyyy-MM-dd
      */
     public static String getFriendlyTimeSpanByNow(long timestamp) {
         long now = System.currentTimeMillis();
@@ -46,7 +46,7 @@ public class TimeUtils {
             return "刚刚";
         }
         if (diff < 60 * 60 * 1000) {
-            return (diff / (60 * 1000)) + "分钟前";
+            return (diff / (60 * 1000)) + "分钟";
         }
         
         Date date = new Date(timestamp);
@@ -66,7 +66,7 @@ public class TimeUtils {
     }
 
     /**
-     * 格式化相对时间（今天显示时间，昨天显示"昨天"，更早显示日期）
+     * 格式化相对时间（今天显示时间，昨天显示“昨天”，更早显示日期）
      */
     public static String formatRelativeTime(long timestamp) {
         long now = System.currentTimeMillis();

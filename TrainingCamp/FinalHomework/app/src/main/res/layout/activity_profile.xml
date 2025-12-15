@@ -18,7 +18,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_triangle_left"
+            android:src="@drawable/ic_arrow_left"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -29,7 +29,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_three_point"
+            android:src="@drawable/ic_more_vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -98,8 +98,8 @@
 
             <!-- ================== 2. 菜单列表 (RecyclerView) ================== -->
             <!--
-                 外层套一个 CardView 是为了还原截图中的白色圆角卡片背景效果
-                 如果不需要卡片效果，直接放 RecyclerView 即可
+                外层套一个 CardView 是为了还原截图中的白色圆角卡片背景效果
+                如果不需要卡片效果，直接使用 RecyclerView 即可
             -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"

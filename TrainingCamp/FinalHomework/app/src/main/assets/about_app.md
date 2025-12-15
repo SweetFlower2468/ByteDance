@@ -1,10 +1,10 @@
-# Final Homework
+# 关于本应用
 
-This is the final homework for the Android Training Camp.
+本应用提供本地/远端大模型聊天能力，并支持模型管理与多种交互体验。
 
-## Features
-- Chat interface with AI
-- Deep thinking mode
-- Model management
-- Text size adjustment
-- Voice settings
+## 功能特性
+- 聊天与会话：支持文本、引用、PDF 附件，流式生成与深度思考展示。
+- 模型管理：导入/下载/激活 gguf 模型，存储占用展示。
+- 交互能力：收藏、点赞/点踩、复制、朗读（TTS）。
+- 个性化：字号与语音设置、左右手输入模式自适应。
+- 数据本地化：消息与会话本地持久化，便于离线使用。

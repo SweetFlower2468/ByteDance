@@ -12,8 +12,7 @@ import com.edu.neu.finalhomework.domain.entity.Message;
 import java.util.List;
 
 /**
- * 消息列表适配器
- * 处理 User/AI/System 三种消息类型
+ * 消息列表适配器，处理 User/AI/System 三种消息类型
  */
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     

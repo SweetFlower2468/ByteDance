@@ -10,7 +10,7 @@ import androidx.room.PrimaryKey;
 public class UserProfile {
     
     @PrimaryKey
-    public long id = 1; // 单例，固定ID为1
+    public long id = 1; // 单例，固定 ID
     
     // 用户昵称
     public String nickname;

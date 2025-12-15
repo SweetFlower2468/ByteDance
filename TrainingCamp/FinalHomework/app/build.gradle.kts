@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    id("com.google.dagger.hilt.android") version "2.57.1"
 }
 
 android {
@@ -25,9 +24,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments += mapOf(
-                    "room.schemaLocation" to "$projectDir/schemas",
-                    // 忽略 Kotlin metadata 错误
-                    "dagger.fastInit" to "enabled"
+                    "room.schemaLocation" to "$projectDir/schemas"
                 )
             }
         }
@@ -54,7 +51,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -70,6 +68,8 @@ android {
     // 这些错误通常来自 Kotlin 库的 metadata，不影响实际编译
     // 注意：这些是注解处理器产生的警告，不应该阻止编译
     tasks.withType<JavaCompile>().configureEach {
+        // 统一使用 UTF-8，避免在 Windows 下出现中文注释/字符串乱码
+        options.encoding = "UTF-8"
         options.compilerArgs.addAll(listOf(
             "-Xmaxerrs", "1000",
             "-Xmaxwarns", "1000",
@@ -86,10 +86,6 @@ android {
     }
 }
 
-hilt {
-    enableAggregatingTask = false
-}
-
 configurations.all {
     resolutionStrategy {
         // 强制使用兼容的 Kotlin 版本
@@ -99,8 +95,6 @@ configurations.all {
 }
 
 dependencies {
-    implementation(libs.appcompat)
-    implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -117,30 +111,15 @@ dependencies {
     // Java 17 支持需开启
     coreLibraryDesugaring ("com.android.tools:desugar_jdk_libs:2.0.3")
     
-    // 添加 Kotlin 标准库以支持 Kotlin metadata（即使项目是纯 Java，某些依赖需要它）
-    // 使用与 Android Gradle Plugin 和 Hilt 2.51.1 兼容的 Kotlin 版本
-    implementation ("org.jetbrains.kotlin:kotlin-stdlib:1.9.24")
-    implementation ("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.24")
-
     // 2. 本地数据库 (Room) - 更新到 2.7.0 以解决 javapoet 兼容性问题
     val roomVersion = "2.7.0"
     implementation ("androidx.room:room-runtime:$roomVersion")
     annotationProcessor ("androidx.room:room-compiler:$roomVersion")
-    implementation ("androidx.room:room-rxjava3:$roomVersion")
     
-    // 依赖注入 (Hilt) - 更新到 2.51.1 以解决 javapoet 兼容性问题
-    val hiltVersion = "2.57.1"
-    implementation ("com.google.dagger:hilt-android:$hiltVersion")
-    annotationProcessor ("com.google.dagger:hilt-compiler:$hiltVersion")
-
-    // 3. 网络与流式处理 (Retrofit + OkHttp + RxJava)
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("com.squareup.retrofit2:adapter-rxjava3:2.9.0")
+    // 3. 网络与流式处理
     implementation ("com.squareup.okhttp3:okhttp:4.11.0")
-    implementation ("com.squareup.okhttp3:logging-interceptor:4.11.0")
-    implementation ("io.reactivex.rxjava3:rxandroid:3.0.2")
-    implementation ("io.reactivex.rxjava3:rxjava:3.1.8")
+    debugImplementation ("com.squareup.okhttp3:logging-interceptor:4.11.0") // 仅调试打印
+    implementation ("com.google.code.gson:gson:2.10.1")
 
     // 4. 前端渲染增强
     // Markdown 渲染 AI 回复
@@ -156,10 +135,6 @@ dependencies {
 
     // 5. 进阶功能支持
     implementation ("org.tensorflow:tensorflow-lite:2.14.0") // 左右手识别模型运行
-    // 动画库 (用于发送按钮平滑移动)
-    implementation("androidx.dynamicanimation:dynamicanimation:1.0.0")
-    // 字节跳动火山引擎 SDK (需自行导入 jar/aar)
-    implementation("com.volcengine:volcengine-java-sdk-ark-runtime:0.2.50")
     // PDF text extraction
     implementation("com.tom-roush:pdfbox-android:2.0.27.0")
 }

@@ -21,7 +21,7 @@
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp">
 
-        <!-- 1. 深度思考组件 (复用) -->
+        <!-- 1. 深度思考组件（复用） -->
         <include
             android:id="@+id/view_deep_think"
             layout="@layout/view_deep_think"
@@ -43,7 +43,7 @@
             android:textColor="@color/text_primary"
             android:textSize="@dimen/text_body"
             app:layout_constraintTop_toBottomOf="@id/view_deep_think"
-            tools:text="这是AI回复的正文内容。\n支持Markdown渲染，边框应该显示出来了。" />
+            tools:text="这是 AI 回复的正文内容。\n支持 Markdown 渲染，边框应该显示出来了吗？" />
 
         <!-- 2.1 Loading Indicator (Simple dots) -->
         <!-- Fixed color reference -->
@@ -76,7 +76,7 @@
             android:layout_marginTop="@dimen/spacing_s"
             app:layout_constraintTop_toBottomOf="@id/divider_actions">
 
-            <!-- 左侧按钮组: 复制、语音、收藏 -->
+            <!-- 左侧按钮区：复制、语音、收藏 -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
                 <ImageButton
                     android:id="@+id/btn_tts"
                     style="@style/SquareActionBtnStyle"
-                    android:src="@drawable/ic_volume_up"
+                    android:src="@drawable/ic_volume_high"
                     android:contentDescription="朗读" />
 
                 <Space android:layout_width="8dp" android:layout_height="wrap_content"/>
@@ -111,7 +111,7 @@
 
             </LinearLayout>
 
-            <!-- 右侧按钮组: 重说、删除 -->
+            <!-- 右侧按钮区：重说、删除 -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

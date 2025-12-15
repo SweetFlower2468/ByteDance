@@ -12,13 +12,13 @@
     android:paddingHorizontal="16dp"
     android:paddingVertical="12dp">
 
-    <!-- 左侧图标 (带背景圆圈) -->
+    <!-- 左侧图标（带背景圆形） -->
     <ImageView
         android:id="@+id/iv_icon"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:padding="8dp"
-        android:src="@drawable/ic_volume_up"
+        android:src="@drawable/ic_volume_high"
         android:background="@drawable/bg_icon_circle"
         app:tint="@color/white" />
 
@@ -33,7 +33,7 @@
         android:textSize="16sp"
         tools:text="声音设置" />
 
-    <!-- 右侧状态文字 -->
+    <!-- 右侧状态文本 -->
     <TextView
         android:id="@+id/tv_value"
         android:layout_width="wrap_content"
@@ -48,7 +48,7 @@
     <ImageView
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:src="@drawable/ic_triangle_right"
+        android:src="@drawable/ic_arrow_right"
         app:tint="@color/text_tertiary" />
 
 </LinearLayout>

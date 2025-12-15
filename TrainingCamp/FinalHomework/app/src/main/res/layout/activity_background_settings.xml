@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_background"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        app:navigationIcon="@drawable/ic_arrow_left"
         app:title="背景设置"
         app:titleCentered="true" />
 

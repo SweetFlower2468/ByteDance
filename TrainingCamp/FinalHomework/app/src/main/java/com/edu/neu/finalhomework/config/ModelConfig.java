@@ -7,12 +7,12 @@ import java.util.List;
 public class ModelConfig {
     public static int nThreads = Math.max(1, Runtime.getRuntime().availableProcessors() - 2);
     public static int nContext = 4096;
-    // nBatch will be set dynamically based on device capability (see DeviceSpecUtil)
+    // nBatch将根据设备能力动态设置（参见DeviceSpecUtil）
     public static int nBatch = 512;
-    // GPU Layers: 0 = CPU only, 99 = Attempt to offload all layers to GPU (requires Vulkan/OpenCL build)
+    // GPU层: 0 = 仅CPU, 99 = 尝试将所有层卸载到GPU（需要Vulkan/OpenCL构建）
     public static int nGpuLayers = 99;
     
-    // UI Throttle (ms) to prevent SurfaceFlinger overload
+    // UI节流（毫秒）以防止SurfaceFlinger过载
     public static long uiUpdateIntervalMs = 100;
 
     public static List<LocalModel> getBuiltInModels() {
@@ -69,7 +69,7 @@ public class ModelConfig {
         m4.isVision = true;
         list.add(m4);
 
-        // 5. Doubao-pro-32k (Built-in Network)
+        // 5. 豆包专业版-32k（内置网络模型）
         LocalModel m5 = new LocalModel();
         m5.name = "Doubao-pro-32k";
         m5.version = "ep-20240604055536-mkp7g"; // Example Endpoint ID
@@ -79,18 +79,18 @@ public class ModelConfig {
         m5.isDeepThink = false;
         m5.provider = "doubao";
         m5.apiUrl = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
-        // User needs to set API KEY
+        // 用户需要设置API密钥
         list.add(m5);
 
-        // 6. DeepSeek-R1 (Built-in Network)
+        // 6. DeepSeek-R1（内置网络模型）
         LocalModel m6 = new LocalModel();
         m6.name = "DeepSeek-R1";
         m6.version = "ep-20250208151448-69279"; // Example Endpoint ID
         m6.status = LocalModel.Status.READY;
         m6.isLocal = false;
         m6.isBuiltIn = true;
-        m6.isDeepThink = true; // Supports thinking
-        m6.provider = "doubao"; // It is hosted on Ark/Volcano Engine
+        m6.isDeepThink = true; // 支持思考
+        m6.provider = "doubao"; // 托管在方舟/火山引擎上
         m6.apiUrl = "https://ark.cn-beijing.volces.com/api/v3/chat/completions";
         list.add(m6);
 

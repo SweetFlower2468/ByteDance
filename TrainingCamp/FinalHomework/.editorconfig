@@ -1,0 +1,19 @@
+root = true
+
+# 通用设置：统一 UTF-8，避免中文/特殊字符乱码
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Java/Kotlin 源码
+[*.{java,kt,kts}]
+indent_style = space
+indent_size = 4
+
+# XML/Gradle/资源文件
+[*.{xml,gradle,pro,properties}]
+indent_style = space
+indent_size = 2
+

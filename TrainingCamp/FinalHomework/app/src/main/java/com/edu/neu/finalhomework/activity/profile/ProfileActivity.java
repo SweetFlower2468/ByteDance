@@ -36,7 +36,7 @@ public class ProfileActivity extends BaseActivity {
     private ImageView ivAvatar;
     private TextView tvNickname;
     
-    // IDs for menu items
+    // 菜单项 ID 定义
     private static final int ID_FONT = 1;
     private static final int ID_BACKGROUND = 2;
     private static final int ID_VOICE = 3;
@@ -58,7 +58,7 @@ public class ProfileActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data (e.g., settings might have changed)
+        // 返回时刷新数据（设置可能已变更）
         initData(); 
     }
     
@@ -73,7 +73,7 @@ public class ProfileActivity extends BaseActivity {
     }
     
     private void initData() {
-        // Update profile info
+        // 更新头像与昵称显示
         String avatar = SPUtils.getString("user_avatar", null);
         String nickname = SPUtils.getString("user_nickname", "User_Name");
         
@@ -84,17 +84,17 @@ public class ProfileActivity extends BaseActivity {
 
         List<ProfileMenuAdapter.MenuItem> items = new ArrayList<>();
         
-        // Settings Group
-        items.add(new ProfileMenuAdapter.MenuItem(ID_FONT, R.drawable.ic_size, "字体大小", getFontSizeText()));
+        // 设置分组
+        items.add(new ProfileMenuAdapter.MenuItem(ID_FONT, R.drawable.ic_text_size, "字体大小", getFontSizeText()));
         items.add(new ProfileMenuAdapter.MenuItem(ID_BACKGROUND, R.drawable.ic_photos, "背景设置", SPUtils.getString("background_theme", "默认")));
-        items.add(new ProfileMenuAdapter.MenuItem(ID_VOICE, R.drawable.ic_volume_up, "语音设置", "豆包·温柔女声"));
+        items.add(new ProfileMenuAdapter.MenuItem(ID_VOICE, R.drawable.ic_volume_high, "语音设置", "豆包·温柔女声"));
         items.add(new ProfileMenuAdapter.MenuItem(ID_FAVORITE, R.drawable.ic_star_filled, "我的收藏", null));
         
-        // Support Group
-        items.add(new ProfileMenuAdapter.MenuItem(ID_HELP, R.drawable.ic_search, "帮助与反馈", null)); // Using search icon as placeholder for help
+        // 支持分组
+        items.add(new ProfileMenuAdapter.MenuItem(ID_HELP, R.drawable.ic_search, "帮助与反馈", null)); // 使用搜索图标作为帮助占位
         items.add(new ProfileMenuAdapter.MenuItem(ID_UPDATE, R.drawable.ic_download, "检查更新", "v1.0.0"));
         
-        // About Group
+        // 关于分组
         items.add(new ProfileMenuAdapter.MenuItem(ID_ABOUT, R.drawable.ic_file_other, "关于应用", null));
 
         adapter = new ProfileMenuAdapter(items, item -> {
@@ -115,7 +115,7 @@ public class ProfileActivity extends BaseActivity {
                     startActivity(new Intent(this, HelpActivity.class));
                     break;
                 case ID_UPDATE:
-                    ToastUtils.show(this, "已是最新版本");
+                    ToastUtils.show(this, "已是最新版");
                     break;
                 case ID_ABOUT:
                     startActivity(new Intent(this, AboutActivity.class));

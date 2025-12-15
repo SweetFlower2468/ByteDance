@@ -47,7 +47,7 @@
         <item name="android:background">#66FFFFFF</item>
     </style>
 
-    <!-- AI 消息下方的方形操作按钮样式 -->
+    <!-- AI 消息下方的方形操作按钮样�?-->
     <style name="SquareActionBtnStyle">
         <item name="android:layout_width">36dp</item>
         <item name="android:layout_height">36dp</item>

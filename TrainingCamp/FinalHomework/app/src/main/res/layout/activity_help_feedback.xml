@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_card"
-        app:navigationIcon="@drawable/ic_triangle_left"
+        app:navigationIcon="@drawable/ic_arrow_left"
         app:title="帮助与反馈"
         app:menu="@menu/menu_help_feedback" />
 
@@ -33,7 +33,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/spacing_s"
-                android:text="你好User\n有什么可以帮助你的吗？"
+                android:text="你好 User\n有什么可以帮助你的吗？"
                 android:textColor="@color/black"
                 android:textSize="28sp"
                 android:textStyle="bold" />

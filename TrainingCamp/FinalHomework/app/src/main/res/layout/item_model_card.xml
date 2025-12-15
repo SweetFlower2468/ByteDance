@@ -42,7 +42,7 @@
             android:layout_width="16dp"
             android:layout_height="16dp"
             android:layout_marginStart="4dp"
-            android:src="@drawable/ic_brain_blue"
+            android:src="@drawable/ic_brain_active"
             android:visibility="gone"
             app:layout_constraintStart_toEndOf="@id/tv_model_name"
             app:layout_constraintTop_toTopOf="@id/tv_model_name"

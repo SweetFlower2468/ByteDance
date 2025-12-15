@@ -1,25 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- 基础色 -->
+    <!-- 基础�?-->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
     <!-- Brand Colors -->
-    <color name="brand_primary">#0066FF</color>       <!-- 主色调 -->
+    <color name="brand_primary">#0066FF</color>       <!-- 主色�?-->
     <color name="brand_secondary">#FF6B35</color>
     <color name="brand_primary_dark">#0052CC</color>
-    <color name="brand_primary_light">#E5F0FF</color> <!-- 浅色背景/选中态 -->
+    <color name="brand_primary_light">#E5F0FF</color> <!-- 浅色背景/选中�?-->
 
     <!-- Text Colors -->
     <color name="text_primary">#1A1B1F</color>        <!-- 正文 -->
     <color name="text_secondary">#757780</color>      <!-- 次要信息/时间 -->
     <color name="text_tertiary">#AAABB3</color>       <!-- 提示文字 -->
-    <color name="text_on_brand">#FFFFFF</color>       <!-- 气泡内文字 -->
+    <color name="text_on_brand">#FFFFFF</color>       <!-- 气泡内文�?-->
 
     <!-- Background Surfaces -->
-    <color name="surface_background">#F7F8FA</color>  <!-- 页面大背景 -->
-    <color name="surface_card">#FFFFFF</color>        <!-- 卡片/输入栏背景 -->
+    <color name="surface_background">#F7F8FA</color>  <!-- 页面大背�?-->
+    <color name="surface_card">#FFFFFF</color>        <!-- 卡片/输入栏背�?-->
     <color name="surface_bubble_ai">#CACACA</color>
     <color name="surface_bubble_user">#0066FF</color>
     <color name="surface_deep_think">#F2F4F7</color>  <!-- 思考区灰色背景 -->
@@ -38,8 +38,8 @@
     <color name="light_yellow">#FFFF00</color>
     <color name="dark_light_blue">#42A5F5</color>
 
-    <color name="state_active_bg">#E6F4EA</color>      <!-- 浅绿色背景 -->
-    <color name="state_active_text">#137333</color>    <!-- 深绿色文字 -->
+    <color name="state_active_bg">#E6F4EA</color>      <!-- 浅绿色背�?-->
+    <color name="state_active_text">#137333</color>    <!-- 深绿色文�?-->
     <color name="state_ready_border">#34C759</color>
     <color name="light_light_blue">#B3E5FC</color>   <!-- 绿色边框 -->
 

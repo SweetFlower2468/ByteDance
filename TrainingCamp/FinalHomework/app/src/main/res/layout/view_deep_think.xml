@@ -35,7 +35,7 @@
         android:layout_width="16dp"
         android:layout_height="16dp"
         android:rotation="0"
-        android:src="@drawable/ic_triangle_down"
+        android:src="@drawable/ic_arrow_down"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/text_secondary" />

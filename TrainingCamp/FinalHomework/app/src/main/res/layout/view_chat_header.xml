@@ -16,13 +16,13 @@
         android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="Model Management"
-        android:src="@drawable/ic_menu_burger"
+        android:src="@drawable/ic_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:tint="@color/text_primary" />
 
-    <!-- 2. 中间左侧：模型选择下拉框 (Custom Spinner) -->
+    <!-- 2. 中间左侧：模型选择下拉（Custom Spinner） -->
     <LinearLayout
         android:id="@+id/layout_model_spinner"
         android:layout_width="0dp"
@@ -59,11 +59,11 @@
             android:id="@+id/iv_model_arrow"
             android:layout_width="20dp"
             android:layout_height="20dp"
-            android:src="@drawable/ic_triangle_left"
+            android:src="@drawable/ic_arrow_left"
             app:tint="@color/text_secondary" />
     </LinearLayout>
 
-    <!-- 3. 右侧按钮组 (线性布局包裹) -->
+    <!-- 3. 右侧按钮区（线性布局包裹） -->
     <LinearLayout
         android:id="@+id/layout_header_actions"
         android:layout_width="wrap_content"

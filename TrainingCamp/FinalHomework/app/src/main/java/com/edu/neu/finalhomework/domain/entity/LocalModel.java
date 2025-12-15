@@ -14,29 +14,29 @@ public class LocalModel {
     @PrimaryKey(autoGenerate = true)
     public long id;
     
-    // Model Identity
+    // 模型标识
     public String name;       // e.g., "Llama 3.2"
     public String version;    // e.g., "3B-Instruct"
     
-    // Metadata
+    // 元数据
     public String sizeDisplay;     // e.g., "2.1 GB"
     public String params;          // e.g., "3B"
     public String quantization;    // e.g., "Q4_K_M"
     
-    // Status
+    // 状态
     public Status status;
     public int downloadProgress;   // 0-100
     
-    // Capabilities
+    // 能力
     public boolean isVision;       // If true, show vision icon
     
-    // API / Network Config
+    // API / 网络配置
     public String apiUrl;
     public String apiKey;
     public boolean isDeepThink;
     public String provider; // e.g., "doubao", "openai", "deepseek"
     public boolean isLocal = true; // Default true (downloaded or imported file)
-    public boolean isBuiltIn = false; // Is it a built-in configuration model
+    public boolean isBuiltIn = false; // 是否为内置配置模型
     public String localPath;       // Absolute path for imported local models
     public String downloadUrl;     // URL for downloading local models
     

@@ -8,7 +8,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 /**
- * Message 实体中 List<Attachment> 的类型转换器
+ * Message 实体的 List<Attachment> 类型转换器
  */
 public class MessageTypeConverter {
     

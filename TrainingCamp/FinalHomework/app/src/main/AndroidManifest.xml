@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <!-- 主界面 -->
+        <!-- 主界�?-->
         <activity
             android:name=".activity.main.ChatActivity"
             android:exported="false"

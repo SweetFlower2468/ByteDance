@@ -38,7 +38,7 @@ public class FavoriteDetailActivity extends BaseActivity {
         
         recyclerDetail = findViewById(R.id.recycler_detail);
         recyclerDetail.setLayoutManager(new LinearLayoutManager(this));
-        // Empty list initially
+        // 初始为空列表
         chatAdapter = new ChatAdapter(new ArrayList<>());
         chatAdapter.setReadOnly(true); 
         recyclerDetail.setAdapter(chatAdapter);
@@ -51,7 +51,7 @@ public class FavoriteDetailActivity extends BaseActivity {
 
             List<Message> displayList = new ArrayList<>();
             if (fav.userContent != null) {
-                Message q = new Message();
+                Message q = new Message(); // 构造用户消息
                 q.type = "user";
                 q.content = fav.userContent;
                 q.timestamp = fav.createdAt - 1;
@@ -61,7 +61,7 @@ public class FavoriteDetailActivity extends BaseActivity {
                 displayList.add(q);
             }
             if (fav.aiContent != null) {
-                Message a = new Message();
+                Message a = new Message(); // 构造 AI 回复消息
                 a.type = "ai";
                 a.content = fav.aiContent;
                 a.timestamp = fav.createdAt;

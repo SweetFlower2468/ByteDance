@@ -17,7 +17,7 @@
         android:background="@drawable/bg_circle_blue"
         android:backgroundTint="#E3F2FD"
         android:padding="10dp"
-        android:src="@drawable/ic_brain_blue"
+        android:src="@drawable/ic_brain_active"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -57,7 +57,7 @@
         app:layout_constraintEnd_toStartOf="@id/tv_token_badge"
         app:layout_constraintStart_toEndOf="@id/iv_session_avatar"
         app:layout_constraintTop_toBottomOf="@id/tv_session_title"
-        tools:text="好的，以下是冒泡排序的优化版本代码..." />
+        tools:text="好的，以下是冒泡排序的优化版本代码.." />
 
     <!-- 4. Timestamp -->
     <TextView

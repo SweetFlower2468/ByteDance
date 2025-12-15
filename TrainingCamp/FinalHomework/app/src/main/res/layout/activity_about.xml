@@ -13,7 +13,7 @@
         android:background="@color/surface_background"
         app:title="关于应用"
         app:titleCentered="true"
-        app:navigationIcon="@drawable/ic_triangle_left" />
+        app:navigationIcon="@drawable/ic_arrow_left" />
 
     <ScrollView
         android:layout_width="match_parent"

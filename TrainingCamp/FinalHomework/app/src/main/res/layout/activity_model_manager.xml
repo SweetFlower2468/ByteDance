@@ -13,7 +13,7 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:padding="12dp"
-        android:src="@drawable/ic_triangle_left"
+        android:src="@drawable/ic_arrow_left"
         app:tint="@color/text_primary"
         android:background="?attr/selectableItemBackgroundBorderless"
         app:layout_constraintStart_toStartOf="parent"

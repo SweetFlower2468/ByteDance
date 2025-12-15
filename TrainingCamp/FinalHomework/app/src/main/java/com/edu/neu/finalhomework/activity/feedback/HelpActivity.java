@@ -50,7 +50,7 @@ public class HelpActivity extends BaseActivity {
         });
         
         TextView tvGreeting = findViewById(R.id.tv_greeting);
-        String nickname = SPUtils.getString("user_nickname", "User");
+        String nickname = SPUtils.getString("user_nickname", "用户");
         tvGreeting.setText("你好 " + nickname + "\n有什么可以帮助你的吗？");
         
         RecyclerView recyclerFaq = findViewById(R.id.recycler_faq);
@@ -62,11 +62,11 @@ public class HelpActivity extends BaseActivity {
     
     private List<FAQ> getFaqs() {
         List<FAQ> list = new ArrayList<>();
-        list.add(new FAQ("如何下载本地模型？", "在首页点击“模型管理”进入，选择喜欢的模型点击下载即可。支持断点续传。"));
+        list.add(new FAQ("如何下载本地模型？", "在首页点击“模型管理”进入，选择喜欢的模型点击下载即可，支持断点续传。"));
         list.add(new FAQ("什么是深度思考模式？", "开启深度思考后，AI 会在回复前进行多步骤推理，展示思考过程，适合复杂逻辑问题。"));
         list.add(new FAQ("如何备份聊天记录？", "聊天记录目前存储在本地数据库中，暂不支持云端备份，请勿清除应用数据。"));
         list.add(new FAQ("支持图片识别吗？", "支持。点击输入框左侧的“+”号，选择相册或拍照上传图片，AI 可以识别图片内容。"));
-        list.add(new FAQ("如何切换夜间模式？", "在“个人中心” -> “背景设置”中可以选择浅色、深色或跟随系统模式。"));
+        list.add(new FAQ("如何切换夜间模式？", "在“个人中心”-> “背景设置”中可以选择浅色、深色或跟随系统模式。"));
         return list;
     }
     

@@ -3,7 +3,7 @@ package com.edu.neu.finalhomework.domain.entity;
 import java.io.Serializable;
 
 /**
- * 附件对象（File/Image）
+ * 附件对象（文件/图片）
  */
 public class Attachment implements Serializable {
     
@@ -19,7 +19,7 @@ public class Attachment implements Serializable {
     // 文件大小（字节）
     public long fileSize;
     
-    // 显示用的大小字符串
+    // 显示用的大小字符
     public String displaySize;
     
     // MIME 类型

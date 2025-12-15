@@ -28,10 +28,10 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <!--
-           1. 附件展示区 (文件/图片合成器)
+           1. 附件展示区（文件/图片组合）
            用户要求：在最上方
            复用 view_quote_file_preview (内含横向 RecyclerView)
-           注意：在 Adapter 中需隐藏内部的 btn_close
+           注意：在 Adapter 中需隐藏内部 btn_close
         -->
         <include
             android:id="@+id/include_quote_file"
@@ -43,10 +43,9 @@
             tools:visibility="visible" />
 
         <!--
-           2. 文本引用区
-           用户要求：在文件下方
+           2. 文本引用（在文件下方）
            复用 view_quote_text_preview
-           注意：在 Adapter 中需隐藏内部的 btn_close
+           注意：在 Adapter 中需隐藏内部 btn_close
         -->
         <include
             android:id="@+id/include_quote_text"

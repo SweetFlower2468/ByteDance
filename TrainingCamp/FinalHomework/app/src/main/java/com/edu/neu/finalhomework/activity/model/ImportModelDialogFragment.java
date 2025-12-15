@@ -33,12 +33,12 @@ public class ImportModelDialogFragment extends DialogFragment {
     private EditText etNetUrl, etNetName, etNetModelId, etNetKey;
     private AutoCompleteTextView dropdownProvider;
     private MaterialSwitch switchDeepThink, switchVision;
-    private MaterialSwitch switchLocalDeepThink; // New Switch
+    private MaterialSwitch switchLocalDeepThink; // 新增本地深度思考开关（UI 隐藏）
     
     private boolean isLocalMode = false;
     private ActivityResultLauncher<String> fileLauncher;
     
-    private LocalModel editModel; // Model being edited
+    private LocalModel editModel; // 正在编辑的模型
 
     public interface OnModelImportListener {
         void onImport(LocalModel model);
@@ -103,11 +103,11 @@ public class ImportModelDialogFragment extends DialogFragment {
         switchVision = view.findViewById(R.id.switch_vision);
         switchLocalDeepThink = view.findViewById(R.id.switch_local_deep_think);
         
-        // Setup Provider Dropdown
+        // 配置下拉选择模型供应商
         String[] providers = new String[]{"Doubao (Volcano Engine)", "OpenAI", "DeepSeek"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_dropdown_item_1line, providers);
         dropdownProvider.setAdapter(adapter);
-        dropdownProvider.setText(providers[0], false); // Default
+        dropdownProvider.setText(providers[0], false); // 默认选择 Doubao
         
         Button btnImport = view.findViewById(R.id.btn_import);
         
@@ -139,21 +139,21 @@ public class ImportModelDialogFragment extends DialogFragment {
             });
         }
         
-        // Handle Edit Mode
+        // 编辑模式预填
         if (editModel != null) {
             btnImport.setText("保存修改");
             if (btnDelete != null) btnDelete.setVisibility(View.VISIBLE);
             isLocalMode = editModel.isLocal;
             
-            // Pre-fill
+            // 预填表单
             if (isLocalMode) {
                 toggleGroup.check(R.id.btn_type_local);
-                layoutLocal.setVisibility(View.VISIBLE); // Explicitly show
-                layoutNetwork.setVisibility(View.GONE); // Explicitly hide
+                layoutLocal.setVisibility(View.VISIBLE); // 显示本地表单
+                layoutNetwork.setVisibility(View.GONE); // 隐藏网络表单
                 etLocalName.setText(editModel.name);
                 // 本地模型禁用深度思考（隐藏开关已在布局中处理）
                 
-                // Show URL if exists, otherwise show path
+                // 若有下载 URL 显示 URL，否则展示本地路径
                 if (editModel.downloadUrl != null && !editModel.downloadUrl.isEmpty()) {
                     etLocalPath.setText(editModel.downloadUrl);
                 } else {
@@ -168,7 +168,7 @@ public class ImportModelDialogFragment extends DialogFragment {
                 switchDeepThink.setChecked(editModel.isDeepThink);
                 switchVision.setChecked(editModel.isVision);
                 
-                // Set Provider
+                // 回填供应商显示文案
                 String p = editModel.provider;
                 if (p != null) {
                     if (p.equalsIgnoreCase("openai")) dropdownProvider.setText("OpenAI", false);
@@ -177,7 +177,7 @@ public class ImportModelDialogFragment extends DialogFragment {
                 }
             }
             
-            // Disable switching type
+            // 编辑模式禁用类型切换
             for (int i = 0; i < toggleGroup.getChildCount(); i++) {
                 toggleGroup.getChildAt(i).setEnabled(false);
             }
@@ -188,15 +188,15 @@ public class ImportModelDialogFragment extends DialogFragment {
         new Thread(() -> {
             java.util.List<java.io.File> foundFiles = new java.util.ArrayList<>();
             
-            // 1. Check getFilesDir() (Internal Storage /files)
+            // 1. 扫描内部存储 /files 目录
             java.io.File internalFiles = requireContext().getFilesDir();
             scanDirForGGUF(internalFiles, foundFiles);
             
-            // 2. Check getExternalFilesDir(null) (External Storage /files)
+            // 2. 扫描外部私有 /files 目录
             java.io.File externalFiles = requireContext().getExternalFilesDir(null);
             scanDirForGGUF(externalFiles, foundFiles);
             
-            // 3. Check getExternalFilesDir("models")
+            // 3. 扫描外部私有 /files/models 目录
             java.io.File modelFiles = requireContext().getExternalFilesDir("models");
             scanDirForGGUF(modelFiles, foundFiles);
             
@@ -219,7 +219,7 @@ public class ImportModelDialogFragment extends DialogFragment {
         
         for (java.io.File f : files) {
             if (f.isFile() && f.getName().toLowerCase().endsWith(".gguf")) {
-                // Avoid duplicates by absolute path
+                // 通过绝对路径去重
                 boolean exists = false;
                 for (java.io.File existing : results) {
                     if (existing.getAbsolutePath().equals(f.getAbsolutePath())) {
@@ -243,7 +243,7 @@ public class ImportModelDialogFragment extends DialogFragment {
             .setItems(fileNames, (dialog, which) -> {
                 java.io.File selected = files.get(which);
                 etLocalPath.setText(selected.getAbsolutePath());
-                // Auto fill name if empty
+                // 若名称为空则自动填充
                 if (etLocalName.getText().toString().isEmpty()) {
                     String name = selected.getName();
                     if (name.toLowerCase().endsWith(".gguf")) {
@@ -257,7 +257,7 @@ public class ImportModelDialogFragment extends DialogFragment {
     }
 
     private void handleImport() {
-        // Create new or use existing
+        // 新建或复用待编辑模型实例
         LocalModel model = (editModel != null) ? editModel : new LocalModel();
         
         if (editModel == null) {
@@ -277,21 +277,20 @@ public class ImportModelDialogFragment extends DialogFragment {
             
             model.name = name;
             model.isLocal = true;
-            model.isDeepThink = false; // 本地模型不支持深度思考
-            
-            // Check if it's a URL
+            model.isDeepThink = false; // 本地模型不支持深度思考           
+            // 判断是否为 URL
             if (pathOrUrl.startsWith("http://") || pathOrUrl.startsWith("https://")) {
                 model.downloadUrl = pathOrUrl;
-                // Define target local path
+                // 计算目标本地路径
                 String fileName = name.endsWith(".gguf") ? name : name + ".gguf";
                 java.io.File modelDir = requireContext().getExternalFilesDir("models");
                 if (modelDir != null) {
                     model.localPath = new java.io.File(modelDir, fileName).getAbsolutePath();
                 } else {
-                    model.localPath = pathOrUrl; // Fallback
+                    model.localPath = pathOrUrl; // 兜底
                 }
                 
-                // If newly imported or if URL changed
+                // 新增或更换 URL 时重置状态
                 if (editModel == null || !pathOrUrl.equals(editModel.downloadUrl)) {
                     model.status = LocalModel.Status.NOT_DOWNLOADED;
                     model.downloadProgress = 0;
@@ -299,7 +298,7 @@ public class ImportModelDialogFragment extends DialogFragment {
             } else {
                 model.localPath = pathOrUrl;
                 model.downloadUrl = null;
-                // Assume local file is ready
+                // 本地文件视为就绪
                 if (editModel == null || !pathOrUrl.equals(editModel.localPath)) {
                     model.status = LocalModel.Status.READY;
                     model.downloadProgress = 100;
@@ -327,19 +326,19 @@ public class ImportModelDialogFragment extends DialogFragment {
             model.name = name;
             model.apiUrl = url;
             model.apiKey = key;
-            model.version = modelId.isEmpty() ? name : modelId; // Use entered ID, or fallback to name if empty
+            model.version = modelId.isEmpty() ? name : modelId; // 优先用填写的 ID，否则回退为名称
             model.isLocal = false;
             model.isDeepThink = switchDeepThink.isChecked();
             model.isVision = switchVision.isChecked();
             
-            // Map display string to code
+            // 将下拉显示文案映射为内部 provider 代号
             String displayProvider = dropdownProvider.getText().toString();
             if (displayProvider.contains("OpenAI")) model.provider = "openai";
             else if (displayProvider.contains("DeepSeek")) model.provider = "deepseek";
             else model.provider = "doubao";
             
             if (editModel == null) {
-                // model.version already set above
+                // model.version 已在上方设置
                 model.sizeDisplay = "API";
                 model.params = "API";
                 model.quantization = "API";

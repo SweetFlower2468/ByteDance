@@ -21,7 +21,7 @@ public class FontSizeActivity extends BaseActivity {
     private Slider sliderFontSize;
     private TextView tvUserMsg, tvAiMsg;
     
-    // Default Text Sizes in SP
+    // 预览用默认字号（SP）
     private static final float DEFAULT_SIZE_BODY = 16f; 
 
     @Override
@@ -43,19 +43,19 @@ public class FontSizeActivity extends BaseActivity {
         
         if (userMsgLayout != null) {
             tvUserMsg = userMsgLayout.findViewById(R.id.tv_content);
-            // Set mock text
-            if (tvUserMsg != null) tvUserMsg.setText("收到，调整很清晰。");
+            // 设置模拟文案
+            if (tvUserMsg != null) tvUserMsg.setText("收到，调整很清晰！");
         }
         
         if (aiMsgLayout != null) {
             tvAiMsg = aiMsgLayout.findViewById(R.id.tv_content);
-            // Set mock text
-            if (tvAiMsg != null) tvAiMsg.setText("你好，字号效果展示。");
+            // 设置模拟文案
+            if (tvAiMsg != null) tvAiMsg.setText("你好，字号效果展示～");
         }
     }
     
     private void initData() {
-        // Load current scale
+        // 读取当前字号缩放
         float currentScale = SPUtils.getFontSizeScale();
         float sliderValue = 1.0f;
         if (currentScale == 0.85f) sliderValue = 0.0f;
@@ -65,7 +65,7 @@ public class FontSizeActivity extends BaseActivity {
         
         sliderFontSize.setValue(sliderValue);
         
-        // Init preview text
+        // 初始化预览文本显示
         updatePreviewText(currentScale);
     }
     
@@ -73,7 +73,7 @@ public class FontSizeActivity extends BaseActivity {
         toolbar.setNavigationOnClickListener(v -> finish());
         
         toolbar.setOnMenuItemClickListener(item -> {
-            if (item.getItemId() == R.id.action_confirm) { // Assuming menu_font has confirm action
+            if (item.getItemId() == R.id.action_confirm) { // 假定菜单含确认动作
                 saveFontSize();
                 return true;
             }
@@ -95,15 +95,7 @@ public class FontSizeActivity extends BaseActivity {
     }
     
     private void updatePreviewText(float scale) {
-        // We need to access the TextViews. 
-        // Since we didn't add IDs to includes, let's try to find them.
-        // This is fragile but works if layout order is static.
-        
-        // Recursively finding all TextViews with id tv_content?
-        // Let's assume I can update activity_font_size.xml to add IDs.
-        // I will do that in a separate tool call for robustness.
-        // For now, I will write the logic assuming they are accessible via `findViewById` if I had unique IDs.
-        // I'll update the XML below.
+        // 需要获取预览 TextView。布局中未分配独立 ID，当前通过包含视图查找，依赖布局顺序（较脆弱）。
         
         if (tvUserMsg != null) tvUserMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_SIZE_BODY * scale);
         if (tvAiMsg != null) tvAiMsg.setTextSize(TypedValue.COMPLEX_UNIT_SP, DEFAULT_SIZE_BODY * scale);
@@ -112,18 +104,15 @@ public class FontSizeActivity extends BaseActivity {
     private void saveFontSize() {
         float scale = getScaleFromValue(sliderFontSize.getValue());
         SPUtils.setFontSizeScale(scale);
-        // Restart app or activity chain to apply? 
-        // BaseActivity handles it in onCreate.
-        // Usually need to recreate back stack.
-        // For simplicity:
+        // 是否需要重启应用/任务栈以生效？BaseActivity 在 onCreate 中会应用配置。
+        // 通常需重建回退栈，这里简化处理：
+        // （可选方案）启动主界面并清空栈：
         // Intent intent = new Intent(this, MainActivity.class);
         // intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         // startActivity(intent);
-        
-        // Or just finish and let user navigate back, but previous activities won't update until recreated.
-        // Let's just finish with a toast.
-        // Or call recreate() on this activity to show it works? But this activity overrides it dynamically?
-        // BaseActivity applies config on onCreate.
+        //
+        // 也可仅 finish 让用户返回，之前界面需重建才会更新；或调用 recreate() 强制刷新当前页。
+        // 现采用简化方案：保存后直接关闭。
         
         SPUtils.setFontSizeScale(scale);
         finish();

@@ -13,7 +13,7 @@
         android:background="@color/surface_background"
         app:title="反馈历史"
         app:titleCentered="true"
-        app:navigationIcon="@drawable/ic_triangle_left" />
+        app:navigationIcon="@drawable/ic_arrow_left" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_history"

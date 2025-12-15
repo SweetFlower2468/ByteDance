@@ -66,7 +66,7 @@ public class HistoryActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadSessions(); // Reload on resume to reflect changes from ChatActivity
+        loadSessions(); // 返回后重新加载，体现聊天页的更新
     }
 
     private void initViews() {
@@ -107,7 +107,7 @@ public class HistoryActivity extends BaseActivity {
     
 
     private void updateList(List<Session> sessions) {
-        adapter.submitList(new ArrayList<>(sessions)); // submit new list instance
+        adapter.submitList(new ArrayList<>(sessions)); // 提交新列表副本
         if (sessions.isEmpty()) {
             layoutEmpty.setVisibility(View.VISIBLE);
             recyclerHistory.setVisibility(View.GONE);
@@ -121,7 +121,7 @@ public class HistoryActivity extends BaseActivity {
         btnBack.setOnClickListener(v -> finish());
         
         btnClearAll.setOnClickListener(v -> {
-            // Clear all logic
+            // 清空全部记录
             if (allSessions.isEmpty()) return;
             
             executorService.execute(() -> {
@@ -170,8 +170,8 @@ public class HistoryActivity extends BaseActivity {
     
     private void setupSwipeToDelete() {
         ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-            private final ColorDrawable background = new ColorDrawable(0xFFE57373); // Red
-            private final Drawable deleteIcon = ContextCompat.getDrawable(HistoryActivity.this, R.drawable.ic_trash_red); // Or white trash icon
+            private final ColorDrawable background = new ColorDrawable(0xFFE57373); // 红色背景
+            private final Drawable deleteIcon = ContextCompat.getDrawable(HistoryActivity.this, R.drawable.ic_trash_red); // 删除图标
 
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -183,29 +183,25 @@ public class HistoryActivity extends BaseActivity {
                 int position = viewHolder.getAdapterPosition();
                 Session sessionToDelete = adapter.getSessionAt(position);
                 
-                // Remove from DB
+                // 删除数据库记录
                 executorService.execute(() -> {
                     App.getInstance().getDatabase().sessionDao().deleteSession(sessionToDelete);
                 });
                 
-                // Update UI
+                // 更新界面列表
                 List<Session> currentList = new ArrayList<>(adapter.getCurrentList());
                 currentList.remove(position);
-                updateList(currentList); // Submit list updates UI
+                updateList(currentList); // 提交列表刷新 UI
                 
-                // Also update source of truth in memory if searching? 
-                // Better to just reload or manage local list.
+                // 同步内存源数据；如处于搜索模式可直接重载
                 allSessions.remove(sessionToDelete);
 
-                // Undo Snackbar
+                // 撤销提示
                 Snackbar.make(recyclerHistory, "已删除会话", Snackbar.LENGTH_LONG)
                         .setAction("撤销", v -> {
-                            // Restore
+                            // 撤销恢复
                             executorService.execute(() -> {
-                                App.getInstance().getDatabase().sessionDao().insertSession(sessionToDelete); // Re-insert might change ID if auto-gen? 
-                                // Ideally we keep ID. But insertSession returns new ID.
-                                // For undo, strict consistency suggests re-inserting same data.
-                                // Let's just insert back.
+                                App.getInstance().getDatabase().sessionDao().insertSession(sessionToDelete); // 撤销时重新插入
                                 runOnUiThread(() -> loadSessions());
                             });
                         }).show();
@@ -216,9 +212,9 @@ public class HistoryActivity extends BaseActivity {
                 super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
                 
                 View itemView = viewHolder.itemView;
-                int backgroundCornerOffset = 20; // optional
+                int backgroundCornerOffset = 20; // 圆角边距（可选，未使用）
 
-                if (dX < 0) { // Swiping to the left
+                if (dX < 0) { // 向左滑动
                     background.setBounds(itemView.getRight() + (int) dX, itemView.getTop(), itemView.getRight(), itemView.getBottom());
                     background.draw(c);
                     
@@ -230,7 +226,7 @@ public class HistoryActivity extends BaseActivity {
                         int iconRight = itemView.getRight() - iconMargin;
 
                         deleteIcon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
-                        deleteIcon.setTint(Color.WHITE); // Make it white on red bg
+                        deleteIcon.setTint(Color.WHITE); // 红底上使用白色图标
                         deleteIcon.draw(c);
                     }
                 }

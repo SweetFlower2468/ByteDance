@@ -62,14 +62,14 @@ public class EditProfileActivity extends BaseActivity {
         etNickname = findViewById(R.id.et_nickname);
         etUserId = findViewById(R.id.et_user_id);
         
-        // User ID is read-only
+        // 用户 ID 只读，不允许编辑
         etUserId.setEnabled(false); 
     }
     
     private void initData() {
         String avatar = SPUtils.getString("user_avatar", null);
         String nickname = SPUtils.getString("user_nickname", "User_Name");
-        String userId = SPUtils.getString("user_id", "842374457"); // Default ID
+        String userId = SPUtils.getString("user_id", "842374457"); // 默认 ID
         
         if (avatar != null) {
             currentAvatarUri = avatar;

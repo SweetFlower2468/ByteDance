@@ -4,8 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 /**
- * SharedPreferences 工具类
- * 存取字体、背景、设置等
+ * SharedPreferences 工具类：存取字体、背景、设置等
  */
 public class SPUtils {
     

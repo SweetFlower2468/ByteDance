@@ -44,29 +44,29 @@ public class ChatInputPanel extends ConstraintLayout {
 
     private EditText etInput;
     private ImageButton btnSend;
-    private ImageButton btnMoreFeatures; // Deep Think toggle in input row
-    private View actionPanel; // Bottom tool panel
+    private ImageButton btnMoreFeatures; // 输入行的深度思考开关
+    private View actionPanel; // 底部工具面板
     private ConstraintLayout innerLayout;
     
-    // Preview containers
+    // 预览容器
     private View layoutPreviewContainer;
     private View viewQuoteText;
     private View viewQuoteFileWrapper; 
     private RecyclerView recyclerAttachments;
     private AttachmentAdapter attachmentAdapter;
 
-    // Action Panel Items
+    // 底部操作区
     private View actionCamera;
     private View actionGallery;
     private View actionFile;
     private View actionDeepThink;
 
-    // State Machine
+    // 状态机
     private enum State {
-        IDLE,       // Input empty, panel closed -> Show ADD icon
-        TYPING,     // Input has text -> Show SEND icon
-        PANEL_OPEN, // Input empty, panel open -> Show CLOSE icon
-        GENERATING  // Generatng response -> Show STOP icon
+        IDLE,       // 输入为空且面板关闭 -> 显示“添加”图标
+        TYPING,     // 输入有文本 -> 显示“发送”图标
+        PANEL_OPEN, // 输入为空且面板展开 -> 显示“关闭”图标
+        GENERATING  // 正在生成 -> 显示“停止”图标
     }
 
     private State currentState = State.IDLE;
@@ -115,14 +115,14 @@ public class ChatInputPanel extends ConstraintLayout {
         
         layoutPreviewContainer = findViewById(R.id.layout_preview_container);
         viewQuoteText = findViewById(R.id.view_quote_text);
-        viewQuoteFileWrapper = findViewById(R.id.view_quote_file); // Points to view_quote_file_preview
+        viewQuoteFileWrapper = findViewById(R.id.view_quote_file); // 对应 view_quote_file_preview
         recyclerAttachments = viewQuoteFileWrapper.findViewById(R.id.recycler_attachments);
         View btnCloseAttachments = viewQuoteFileWrapper.findViewById(R.id.btn_close);
         if (btnCloseAttachments != null) {
             btnCloseAttachments.setOnClickListener(v -> clearQuote());
         }
         
-        // Initialize Action Panel items
+        // 初始化底部操作区
         actionCamera = findViewById(R.id.action_camera);
         actionGallery = findViewById(R.id.action_gallery);
         actionFile = findViewById(R.id.action_file);
@@ -133,7 +133,7 @@ public class ChatInputPanel extends ConstraintLayout {
         setupListeners();
         updateState();
         
-        // Restore Hand Mode
+        // 恢复左右手模式
         boolean isLeftHand = com.edu.neu.finalhomework.utils.SPUtils.getBoolean("input_hand_mode_left", false);
         setHandMode(isLeftHand);
     }
@@ -152,13 +152,13 @@ public class ChatInputPanel extends ConstraintLayout {
     }
 
     private void setupActionButtons() {
-        // Configure Action Buttons (Icon + Text)
+        // 配置操作按钮（图标+文字）
         setActionButton(actionCamera, R.drawable.ic_camera, "拍照");
         setActionButton(actionGallery, R.drawable.ic_photos, "相册");
         setActionButton(actionFile, R.drawable.ic_file_upload, "文件");
-        setActionButton(actionDeepThink, R.drawable.ic_brain_gray, "深度思考");
+        setActionButton(actionDeepThink, R.drawable.ic_brain_inactive, "深度思考");
 
-        // Ensure button starts with correct selector
+        // 确保按钮初始状态与 selector 对齐
         btnMoreFeatures.setImageResource(R.drawable.selector_brain_toggle);
     }
 
@@ -171,7 +171,7 @@ public class ChatInputPanel extends ConstraintLayout {
     }
 
     private void setupListeners() {
-        // Text Watcher for State Machine
+        // 文本监听驱动状态机
         etInput.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -185,13 +185,13 @@ public class ChatInputPanel extends ConstraintLayout {
             public void afterTextChanged(Editable s) {}
         });
 
-        // Send/Action Button Click
+        // 发送/停止按钮点击
         btnSend.setOnClickListener(v -> handleSendButtonClick());
 
-        // Brain Toggle (Input Row)
+        // 输入行的深度思考开关
         btnMoreFeatures.setOnClickListener(v -> toggleDeepThink());
 
-        // Action Panel Clicks
+        // 底部操作区点击事件
         if (actionCamera != null) actionCamera.setOnClickListener(v -> {
             if (onActionClickListener != null) onActionClickListener.onCameraClick();
         });
@@ -203,7 +203,7 @@ public class ChatInputPanel extends ConstraintLayout {
         });
         if (actionDeepThink != null) actionDeepThink.setOnClickListener(v -> toggleDeepThink());
         
-        // Editor Action (Enter key)
+        // 输入法回车事件
         etInput.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEND) {
                 if (currentState == State.TYPING) {
@@ -214,10 +214,10 @@ public class ChatInputPanel extends ConstraintLayout {
             return false;
         });
 
-        // Focus Listener to close panel on keyboard open
+        // 焦点监听：键盘弹出时收起面板
         etInput.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                // If input focused (keyboard likely showing), hide tool panel WITHOUT animation to prevent glitches
+                // 若输入框获得焦点（键盘弹出），无动画收起工具面板避免跳动
                 if (isPanelOpen()) {
                     setPanelVisibility(false, false);
                 }
@@ -242,19 +242,19 @@ public class ChatInputPanel extends ConstraintLayout {
                 if (!text.isEmpty() && onSendListener != null) {
                     Message currentQuote = (layoutPreviewContainer.getVisibility() == View.VISIBLE) ? quotedMessage : null;
                     onSendListener.onSend(text, isDeepThinkEnabled, new ArrayList<>(attachmentAdapter.getItems()), currentQuote);
-                    etInput.setText(""); // Clear input
-                    clearQuote(); // Clear attachments and quote after send
+                    etInput.setText(""); // 清空输入
+                    clearQuote(); // 发送后清理引用/附件
                 }
                 break;
             case IDLE:
-                // Expand Panel
+                // 展开面板
                 setPanelVisibility(true);
-                // Clear focus to close keyboard
+                // 取消焦点以收起键盘
                 etInput.clearFocus();
                 hideKeyboard(etInput);
                 break;
             case PANEL_OPEN:
-                // Close Panel
+                // 收起面板
                 setPanelVisibility(false);
                 break;
         }
@@ -270,9 +270,9 @@ public class ChatInputPanel extends ConstraintLayout {
     private void updateState() {
         if (isGenerating) {
             currentState = State.GENERATING;
-            btnSend.setImageResource(R.drawable.ic_stop_circle); // Use specific stop icon
-            btnSend.setBackgroundResource(R.drawable.bg_transparent_circle); // No background
-            btnSend.setImageTintList(getResources().getColorStateList(R.color.text_primary)); // Use primary text color (black/dark)
+            btnSend.setImageResource(R.drawable.ic_stop_circle); // 使用停止图标
+            btnSend.setBackgroundResource(R.drawable.bg_transparent_circle); // 无背景
+            btnSend.setImageTintList(getResources().getColorStateList(R.color.text_primary)); // 使用主文本色
             return;
         }
 
@@ -283,10 +283,10 @@ public class ChatInputPanel extends ConstraintLayout {
         if (hasText) {
             currentState = State.TYPING;
             btnSend.setImageResource(R.drawable.ic_send); 
-             btnSend.setBackgroundResource(R.drawable.bg_circle_button); // Blue circle
+             btnSend.setBackgroundResource(R.drawable.bg_circle_button); // 蓝色圆形背景
              btnSend.setImageTintList(getResources().getColorStateList(android.R.color.white));
         } else {
-            // Restore background
+            // 恢复默认背景
             btnSend.setBackgroundResource(android.R.color.transparent);
             btnSend.setImageTintList(null); 
 
@@ -317,7 +317,7 @@ public class ChatInputPanel extends ConstraintLayout {
             
             TransitionManager.beginDelayedTransition(this, transition);
         }
-        // If not animating, avoid calling TransitionManager methods to prevent conflicts with IME layout passes.
+        // 若不需要动画，避免调用 TransitionManager 以免与键盘布局冲突
         
         actionPanel.setVisibility(visible ? View.VISIBLE : View.GONE);
         updateState();
@@ -340,11 +340,11 @@ public class ChatInputPanel extends ConstraintLayout {
     }
 
     private void updateDeepThinkUI() {
-        // Use state_selected as defined in selector_brain_toggle.xml
+        // 使用 selector_brain_toggle.xml 中的 state_selected 状态
         btnMoreFeatures.setSelected(isDeepThinkEnabled);
         
         if (isDeepThinkEnabled) {
-            btnMoreFeatures.setImageResource(R.drawable.ic_brain_blue);
+            btnMoreFeatures.setImageResource(R.drawable.ic_brain_active);
             btnMoreFeatures.setBackgroundResource(R.drawable.bg_white_circle); 
              btnMoreFeatures.setImageResource(R.drawable.selector_brain_toggle);
              btnMoreFeatures.setImageTintList(null); 
@@ -353,11 +353,11 @@ public class ChatInputPanel extends ConstraintLayout {
              btnMoreFeatures.setImageTintList(null);
         }
         
-        // Also update the icon in the panel if visible
+        // 同步更新面板中的图标与文案
         if (actionDeepThink != null) {
              ImageView iv = actionDeepThink.findViewById(R.id.iv_icon);
              TextView tv = actionDeepThink.findViewById(R.id.tv_label);
-             if (iv != null) iv.setImageResource(isDeepThinkEnabled ? R.drawable.ic_brain_blue : R.drawable.ic_brain_gray);
+             if (iv != null) iv.setImageResource(isDeepThinkEnabled ? R.drawable.ic_brain_active : R.drawable.ic_brain_inactive);
              if (tv != null) tv.setText(isDeepThinkEnabled ? "深度思考(开)" : "深度思考");
         }
     }
@@ -366,7 +366,7 @@ public class ChatInputPanel extends ConstraintLayout {
         btnMoreFeatures.setEnabled(supported);
         btnMoreFeatures.setAlpha(supported ? 1.0f : 0.5f);
         if (!supported && isDeepThinkEnabled) {
-             toggleDeepThink(); // Turn off if currently on but not supported
+             toggleDeepThink(); // 若不支持则强制关闭
         }
     }
 
@@ -385,7 +385,7 @@ public class ChatInputPanel extends ConstraintLayout {
         if (message == null) return;
         this.quotedMessage = message;
         layoutPreviewContainer.setVisibility(View.VISIBLE);
-        // Show Text Preview
+        // 展示文本引用预览
         viewQuoteText.setVisibility(View.VISIBLE);
         viewQuoteFileWrapper.setVisibility(View.GONE);
         
@@ -401,7 +401,7 @@ public class ChatInputPanel extends ConstraintLayout {
     }
     
     /**
-     * Set Attachment (File or Image)
+     * 添加附件（文件或图片）
      */
     public void addAttachment(Uri uri, String type, String name, String size) {
         layoutPreviewContainer.setVisibility(View.VISIBLE);
@@ -412,9 +412,9 @@ public class ChatInputPanel extends ConstraintLayout {
         int insertIndex = attachmentAdapter.getItems().size();
         attachmentAdapter.add(attachment);
 
-        // Compute meta asynchronously to avoid blocking UI
+        // 异步计算附件元信息，避免阻塞 UI
         new Thread(() -> {
-            // Persist permission if possible
+            // 尝试持久化读权限
             try {
                 getContext().getContentResolver().takePersistableUriPermission(uri,
                         android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -425,32 +425,27 @@ public class ChatInputPanel extends ConstraintLayout {
             String extractedText = null;
 
             boolean isPdf = false;
-            if (type != null && type.toLowerCase().contains("pdf")) isPdf = true;
-            if (name != null && name.toLowerCase().endsWith(".pdf")) isPdf = true;
-            if (uri != null && uri.toString().toLowerCase().endsWith(".pdf")) isPdf = true;
+            if (type != null && type.toLowerCase().contains("pdf")) isPdf = true; // 检查类型是否包含pdf
+            if (name != null && name.toLowerCase().endsWith(".pdf")) isPdf = true; // 检查名称是否以.pdf结尾
+            if (uri != null && uri.toString().toLowerCase().endsWith(".pdf")) isPdf = true; // 检查URI是否以.pdf结尾
 
             if (isPdf) {
                 try {
                     extractedText = PdfUtils.extractTextFromPdf(getContext(), uri);
                     if (extractedText != null && !extractedText.isEmpty()) {
                         tokenCount = TokenUtils.estimateTokens(extractedText);
-                        // String preview = extractedText.length() > 400 ? extractedText.substring(0, 400) + "..." : extractedText;
-                        // android.util.Log.i("AttachmentToken", "parsed_text_preview=" + preview);
-                        // android.util.Log.i("AttachmentToken", "parsed_text_full=" + extractedText);
                     } else {
-                        tokenCount = 0; // explicit zero when parser returns null/empty
-                        // android.util.Log.w("AttachmentToken", "parsed_text_empty");
+                        tokenCount = 0; // 解析为空时显式置为0
                     }
                 } catch (Exception ignored) {
                     tokenCount = 0;
-                    // android.util.Log.e("AttachmentToken", "parse_error", ignored);
                 }
             }
 
             attachment.sizeBytes = sizeBytes;
             attachment.tokenCount = tokenCount;
             attachment.extractedText = extractedText;
-            attachment.size = baseDisplay; // 仅尺寸，不在这里重复 token
+            attachment.size = baseDisplay; // 仅显示尺寸，不在这里重复显示token
 
             android.util.Log.i("AttachmentToken", "name=" + name + " bytes=" + sizeBytes + " tokens=" + attachment.tokenCount);
 
@@ -459,7 +454,7 @@ public class ChatInputPanel extends ConstraintLayout {
     }
 
     /**
-     * 在发送阶段重新解析出 token 时，回写到附件预览，避免 UI 仍显示 0。
+     * 在发送阶段重新解析出 token 时，回写到附件预览，避免 UI 仍显示 0
      */
     public void updateAttachmentMeta(Uri uri, int tokenCount, String extractedText) {
         List<AttachmentAdapter.Attachment> list = attachmentAdapter.getItems();
@@ -495,7 +490,7 @@ public class ChatInputPanel extends ConstraintLayout {
 
     /**
      * 切换左右手布局
-     * @param isLeftHand true: 左手模式 (发送按钮在左), false: 右手模式 (发送按钮在右)
+     * @param isLeftHand true: 左手模式（发送按钮在左），false: 右手模式（发送按钮在右）
      */
     public void setHandMode(boolean isLeftHand) {
         if (innerLayout == null) return;
@@ -504,32 +499,32 @@ public class ChatInputPanel extends ConstraintLayout {
         constraintSet.clone(innerLayout);
 
         if (isLeftHand) {
-            // Left Hand: Button on Left, Input on Right
-            // Clear existing
+            // 左手模式：按钮在左，输入框在右
+            // 清理已有约束
             constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END);
             constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START);
             constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START);
             constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END);
 
-            // Button -> Start of Parent
+            // 按钮连接到父布局起始侧
             constraintSet.connect(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.START, dpToPx(8));
             
-            // Input -> End of Button, End of Parent
+            // 输入框连接到按钮末端及父布局末端
             constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START, R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END, dpToPx(8));
             constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.END, dpToPx(12));
             
         } else {
-            // Right Hand: Button on Right, Input on Left (Default)
-            // Clear existing
+            // 右手模式（默认）：按钮在右，输入框在左
+            // 清理已有约束
             constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END);
             constraintSet.clear(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START);
             constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START);
             constraintSet.clear(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END);
 
-            // Button -> End of Parent
+            // 按钮连接到父布局末端
             constraintSet.connect(R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.END, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.END, dpToPx(8));
 
-            // Input -> Start of Parent, End of Button
+            // 输入框连接到父布局起始侧，并连接按钮
             constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.START, androidx.constraintlayout.widget.ConstraintSet.PARENT_ID, androidx.constraintlayout.widget.ConstraintSet.START, dpToPx(12));
             constraintSet.connect(R.id.input_wrapper, androidx.constraintlayout.widget.ConstraintSet.END, R.id.btn_send, androidx.constraintlayout.widget.ConstraintSet.START, dpToPx(8));
         }

@@ -40,8 +40,7 @@
     </LinearLayout>
 
     <!--
-       2. 输入框容器
-       使用 ConstraintLayout 确保内部元素垂直居中
+       2. 输入框容器：使用 ConstraintLayout 确保内部元素垂直居中
     -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/input_wrapper"
@@ -110,7 +109,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:tint="@null" />
 
-    <!-- 4. 底部功能面板 (隐藏区) -->
+    <!-- 4. 底部功能面板 (隐藏态) -->
     <include
         android:id="@+id/action_panel"
         layout="@layout/view_chat_action_panel"

@@ -1,8 +1,7 @@
 package com.edu.neu.finalhomework.config;
 
 /**
- * 限制常量配置
- * 最大图片数、最大文件数等
+ * 限制常量配置：最大图片数、最大文件数等
  */
 public class LimitConfig {
     

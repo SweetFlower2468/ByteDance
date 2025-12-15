@@ -4,7 +4,7 @@ import android.app.ActivityManager;
 import android.content.Context;
 
 /**
- * 设备规格工具，用于根据内存/CPU 动态调整本地推理参数（如 nBatch）。
+ * 设备规格工具，用于根据内存与 CPU 动态调整本地推理参数（如 nBatch）
  */
 public class DeviceSpecUtil {
 
@@ -28,7 +28,7 @@ public class DeviceSpecUtil {
         try {
             ActivityManager am = (ActivityManager) ctx.getSystemService(Context.ACTIVITY_SERVICE);
             if (am != null) {
-                return am.getMemoryClass() * 1024; // MB -> MB (largeHeap 已在 manifest? 如果需要可用 getLargeMemoryClass)
+                return am.getMemoryClass() * 1024; // MB -> MB (largeHeap 已在 manifest? 如果需要可�?getLargeMemoryClass)
             }
         } catch (Exception ignored) {}
         return 2048; // fallback 2GB

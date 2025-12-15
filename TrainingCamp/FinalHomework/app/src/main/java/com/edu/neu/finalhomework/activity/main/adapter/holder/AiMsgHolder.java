@@ -29,7 +29,7 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
     private View layoutActions;
     private View loadingIndicator;
     
-    // Action Buttons
+    // 操作按钮区
     private View btnCopy;
     private View btnTts;
     private View btnFavorite;
@@ -37,10 +37,10 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
     private View btnDelete;
 
     private ChatAdapter.OnMessageActionListener listener;
-    // Removed local state: private boolean isDeepThinkExpanded = true;
+    // 已移除本地状态字段：private boolean isDeepThinkExpanded = true;
     private boolean isReadOnly = false;
     private Markwon markwon;
-    private Message currentMessage; // Hold reference for toggle logic
+    private Message currentMessage; // 保存当前消息以便切换状态
     private boolean longPressTriggered = false; // 避免长按后仍触发单击滚动
     private View lastTouchView = null; // 记录触发手势的视图，用于菜单定位
 
@@ -84,12 +84,12 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
             tvDtDuration = viewDeepThink.findViewById(R.id.tv_dt_duration);
             ivDtArrow = viewDeepThink.findViewById(R.id.iv_dt_arrow);
             
-            // Set toggle listener
+            // 展开/收起监听
             viewDeepThink.setOnClickListener(v -> toggleDeepThink());
         }
         
         loadingIndicator = itemView.findViewById(R.id.loading_indicator);
-        // ... rest of init
+        // 其他初始化
         layoutActions = itemView.findViewById(R.id.layout_actions);
         if (layoutActions != null) {
             btnCopy = layoutActions.findViewById(R.id.btn_copy);
@@ -110,10 +110,10 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
     private void toggleDeepThink() {
         if (tvDtContent == null || currentMessage == null) return;
         
-        // Toggle state in model
+        // 切换模型中的展开状态
         currentMessage.isDeepThinkExpanded = !currentMessage.isDeepThinkExpanded;
         
-        // Update UI
+        // 更新界面
         updateDeepThinkUI(currentMessage.isDeepThinkExpanded);
     }
     
@@ -133,12 +133,12 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
         if (message == null) return;
         this.currentMessage = message;
 
-        // Bind Content
+        // 绑定正文
         if (tvContent != null) {
             markwon.setMarkdown(tvContent, prepareLatexContent(message.content));
         }
         
-        // Show/Hide Loading Indicator
+        // 控制加载动画显隐
         if (loadingIndicator != null) {
             if (message.isGenerating) {
                 loadingIndicator.setVisibility(View.VISIBLE);
@@ -153,20 +153,20 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
             }
         }
 
-        // Bind Deep Think
+        // 绑定深度思考区域
         if (viewDeepThink != null) {
             boolean hasDeepThink = message.deepThink != null && !message.deepThink.isEmpty();
             
             if (hasDeepThink) {
                 viewDeepThink.setVisibility(View.VISIBLE);
                 if (tvDtContent != null) {
-                    // Also render markdown for thinking process
+                    // 思考过程同样渲染 Markdown
                     markwon.setMarkdown(tvDtContent, prepareLatexContent(message.deepThink));
                 }
                 
-                // Use persistent state from Message
+                // 使用消息持久化的展开状态
                 updateDeepThinkUI(message.isDeepThinkExpanded);
-                // Ensure arrow is set correctly immediately without animation for bind
+                // 绑定时立即设置箭头角度（不做动画）
                 if (ivDtArrow != null) {
                     ivDtArrow.setRotation(message.isDeepThinkExpanded ? 0 : -90);
                 }
@@ -176,7 +176,7 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
             }
         }
         
-        // Bind Actions
+        // 绑定操作按钮
         if (listener != null) {
             if (btnCopy != null) btnCopy.setOnClickListener(v -> listener.onCopy(message));
             if (btnTts != null) {
@@ -185,7 +185,7 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
             }
             if (btnFavorite != null) {
                 btnFavorite.setOnClickListener(v -> listener.onFavorite(message));
-                // Update favorite icon state
+                // 更新收藏按钮状态
                 if (btnFavorite instanceof ImageView) {
                     ImageView iv = (ImageView) btnFavorite;
                     if (message.isFavorite) {
@@ -220,7 +220,7 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
         View.OnTouchListener blockTouch = (v, event) -> true;
 
         if (message != null && message.isGenerating) {
-            // 生成中：禁用触摸/焦点，防止抽搐
+            // 生成中：禁用触摸/焦点，防止抖动
             itemView.setOnTouchListener(blockTouch);
             itemView.setLongClickable(false);
             if (tvContent != null) {
@@ -314,7 +314,7 @@ public class AiMsgHolder extends RecyclerView.ViewHolder {
                 anim.start();
                 iv.setColorFilter(iv.getContext().getResources().getColor(R.color.brand_primary));
             } else {
-                iv.setImageResource(R.drawable.ic_volume_up);
+                iv.setImageResource(R.drawable.ic_volume_high);
                 iv.setColorFilter(iv.getContext().getResources().getColor(R.color.text_secondary));
             }
         }

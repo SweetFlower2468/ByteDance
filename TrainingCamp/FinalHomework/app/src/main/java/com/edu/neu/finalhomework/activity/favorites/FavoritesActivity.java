@@ -30,7 +30,7 @@ public class FavoritesActivity extends BaseActivity {
     private RecyclerView recyclerFavorites;
     private FavoriteAdapter adapter;
     
-    // Pagination
+    // 分页控制
     private long lastTimestamp = Long.MAX_VALUE;
     private boolean isLoading = false;
     private boolean isLastPage = false;
@@ -48,10 +48,7 @@ public class FavoritesActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // If coming back from detail, favorite status might have changed?
-        // But DetailActivity is read-only so status won't change unless we allow it there.
-        // User said "click in ... just browse ... cannot delete ...". 
-        // So list should be stable. No need to reload onResume unless strict consistency needed.
+        // 返回详情后，收藏状态理论上不变（详情只读、不可删除），如需绝对一致可在此重载
     }
     
     private void initViews() {

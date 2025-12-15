@@ -10,7 +10,9 @@ public class DeepSeekProvider extends BaseProvider {
 
     @Override
     protected String createRequestBody(LocalModel model, List<ArkClient.Msg> messages, boolean isDeepThink) {
-        String modelId = (model.version != null && !model.version.isEmpty()) ? model.version : model.name;
+        String modelId = (model.version != null && !model.version.trim().isEmpty()) ? model.version.trim() : model.name;
+        if (modelId != null) modelId = modelId.trim();
+        android.util.Log.d("DeepSeekProvider", "Use modelId=" + modelId + " provider=" + model.provider);
         // DeepSeek uses standard OpenAI format for request
         DeepSeekPayload payload = new DeepSeekPayload(modelId, messages, true);
         return gson.toJson(payload);

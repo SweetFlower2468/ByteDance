@@ -57,12 +57,12 @@
             android:ellipsize="end"/>
 
         <TextView
-             android:id="@+id/tv_status"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_marginTop="8dp"
-             android:text="处理中"
-             android:textColor="@color/warning"
-             android:textSize="12sp"/>
+            android:id="@+id/tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="处理中"
+            android:textColor="@color/warning"
+            android:textSize="12sp"/>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
