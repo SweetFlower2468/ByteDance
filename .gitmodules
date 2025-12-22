@@ -1,0 +1,3 @@
+[submodule "TrainingCamp/FinalHomework/TrainingCamp/FinalHomework/app/src/main/cpp"]
+	path = TrainingCamp/FinalHomework/TrainingCamp/FinalHomework/app/src/main/cpp
+	url = https://github.com/ggml-org/llama.cpp.git
